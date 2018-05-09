@@ -11,22 +11,26 @@ fi
 if [ "$#" -ge "1" ]; then
 	good=0
 	if [ "$1" == "kerasm" ]; then
-		cd kernel && ./build.sh asm && cd ..
+		cd kernel && ./build.sh asm && cd .. && echo
 		good=1
 	else
 		if [ "$1" == "kerc" ]; then
-			cd kernel && ./build.sh c && cd ..
+			cd kernel && ./build.sh c && cd .. && echo
 			good=1
 		fi
 	fi
 
 	if [ "$good" -eq "1" ]; then
-		cd bootloader && ./build.sh && cd ..
+		cd bootloader && ./build.sh && cd .. && echo
 		cat bootloader/build/bootloader.bin kernel/build/kernel.bin > build/proj_e-bootker.bin
 		dd status=noxfer conv=notrunc if=build/proj_e-bootker.bin of=build/floopy_proj_e-bootker.fda
+
+		if [ "$#" -eq "1" ]; then
+			exit 0
+		fi
 	fi
 
-	if [ "$#" -eq "2" ]; then
+	if [ "$#" -eq "2" ]; then
 		if [ "$2" == "qemu" ]; then
 			qemu-system-x86_64 -fda build/floopy_proj_e-bootker.fda
 			exit 0

@@ -4,30 +4,6 @@ org 0
 start:
 	jmp main
 
-	; 4K space after this bootloader
-	; Effective addr=Segment*16 + Offset
-	mov ax, 07C0h  ; ax=(location of the bootloader)/16
-	add ax, 20h    ; skip over the size of the bootloader / 16
-	mov ss, ax     ; ss=this location (beginning of our stack region)
-	mov sp, 4096   ; ss:sp=4K (our stack)
-
-	; set data segment to where we're loaded (to access implicitly the next 64K)
-	mov ax, 07C0h
-	mov ds, ax     ; ds=(location of the bootloader)/16
-
-	; print our message
-	mov si, message
-	call proj_e_boot_print
-
-	mov si, reboot_msg
-	call proj_e_boot_print
-
-	call proj_e_boot_getkeypress
-	call proj_e_boot_reboot
-
-	; cli            ; clear the interrupt flag (disable external interrupts)
-	; hlt            ; halt the CPU (until next external interrupt)
-
 main:
 	cli              ; move registers for offset of BIOS 07C0h load point
 	mov ax, 07C0h    ; offset
@@ -41,19 +17,22 @@ main:
 	mov sp, 0xffff
 	sti
 
-	mov ax, 0x01       ; LBA number 1 for sector
-	mov cx, 0x01       ; read one sector from the floppy disk
-	mov bx, 0x200
+	mov si, message
+	call proj_e_boot_print
+	call proj_e_boot_getkeypress
 
+	mov ax, 0x01       ; LBA number 1 for sector
+	mov cx, 0x02       ; read two sectors from the floppy disk
+	mov bx, 0x200
 	; call the read sectors function
 	call proj_e_boot_readsectors
-	; address ES offset BX returned from read sectors
+
+	; address ES offset BX returned from read sectors (call kernel)
 	jmp 0x7e0:0
 
 data:
 	; strings
-	message    db 'Hello World!',     13, 10, 0
-	reboot_msg db 'Press any key to reboot ', 0
+	message    db 'Hello World! Press any key to load the kernel ', 13, 10, 0
 	; parameters
 	sectors_per_track  dw  18
 	heads_per_track    dw   2

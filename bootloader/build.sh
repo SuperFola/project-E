@@ -1,9 +1,9 @@
 #!/bin/bash
 
-echo Building bootloader
+echo Compiling bootloader
 
 if [ ! -d "build" ]; then
-	mkdir build/
+	mkdir build
 fi
 
 nasm -f bin -o build/bootloader.bin boot.asm

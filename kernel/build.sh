@@ -12,10 +12,10 @@ if [ "$#" -eq "1" ]; then
 	else
 		if [ "$1" == "c" ]; then
 			echo "Compiling C Kernel"
-			gcc -m32 -ffreestanding -c kernel.c -o build/kernel.o
-			nasm -f elf32 loader.asm -o build/loader.o
-			ld -m elf_i386 -o build/kernel.elf -Ttext 0x1000 build/loader.o build/kernel.o
-			objcopy -R .note -R .comment -S -O binary build/kernel.elf build/kernel.bin
+			gcc -m32 -ffreestanding -c -o build/kernel.o kernel.c -lgcc
+			#nasm -f elf32 loader.asm -o build/loader.o
+			ld -melf_i386 -Tlinker.ld -nostdlib --nmagic -o build/kernel.elf build/kernel.o
+			objcopy -O binary build/kernel.elf build/kernel.o
 			echo "Build done"
 		else
 			echo "Unrecognized argument. Try asm || c" && exit 1

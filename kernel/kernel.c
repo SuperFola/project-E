@@ -1,3 +1,4 @@
+// must be the first function
 void main(void) {
 	unsigned char* vga = (unsigned char*) 0xB8000;
 

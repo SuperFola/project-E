@@ -24,6 +24,9 @@ if [ "$#" -ge "1" ]; then
 		cd bootloader && ./build.sh && cd .. && echo
 		cat bootloader/build/bootloader.bin kernel/build/kernel.bin > build/proj_e-bootker.bin
 		dd status=noxfer conv=notrunc if=build/proj_e-bootker.bin of=build/floopy_proj_e-bootker.fda
+		#dd if=/dev/zero                       of=build/proj_e.img bs=512              count=2880
+		#dd if=bootloader/build/bootloader.bin of=build/proj_e.img bs=512 conv=notrunc
+		#dd if=kernel/build/kernel.bin         of=build/proj_e.img bs=512 conv=notrunc seek=1
 
 		if [ "$#" -eq "1" ]; then
 			exit 0
@@ -38,11 +41,11 @@ if [ "$#" -ge "1" ]; then
 	fi
 else
 	echo Building ISO
+	echo Need to fix the command before continuing ! && exit 1
 
 	cd bootloader && ./build.sh && cd ..
 	cp bootloader/build/bootloader.flp cdiso/
 
-	echo Need to fix the command before continuing ! && exit 1
 	mkisofs -o build/project_e.iso -b bootloader.flp cdiso/
 
 	exit 0

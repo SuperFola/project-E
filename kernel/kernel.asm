@@ -4,6 +4,9 @@ org 0
 start:
     jmp main
 
+%include "../std/stdio.h"
+%include "../std/gdt_loader.inc"
+
 data:
     message db 'Kernel loaded', 13, 10, 0
 
@@ -12,18 +15,8 @@ main:
     mov ds, ax
 
     mov si, message
-    call print
+    call proj_e_print
     ; jump here
     jmp $
-
-print:
-    lodsb
-    or al, al
-    jz printdone
-    mov ah, 0eh
-    int 10h
-    jmp print
-printdone:
-    ret
 
 times 1024-($-$$) db 0

@@ -1,8 +1,9 @@
 bits 16
-; org 0
 
 start:
     jmp main
+
+%include "../std/stdio.inc"
 
 main:
     cli              ; move registers for offset of BIOS 07C0h load point
@@ -18,21 +19,21 @@ main:
     sti
 
     mov si, message
-    call proj_e_boot_print
-    call proj_e_boot_getkeypress
+    call proj_e_print16
+    call proj_e_getkeypress16
 
     mov ax, 0x01       ; LBA number 1 for sector
     mov cx, 0x02       ; read two sectors from the floppy disk
     mov bx, 0x200
     ; call the read sectors function
-    call proj_e_boot_readsectors
+    call proj_e_readsectors
 
     ; address ES offset BX returned from read sectors (call kernel)
     jmp 0x7e0:0
 
 data:
     ; strings
-    message    db 'Hello World! Press any key to load the kernel ', 13, 10, 0
+    message    db 'Hello World! Press any key to load the kernel', 13, 10, 0
     ; parameters
     sectors_per_track  dw  18
     heads_per_track    dw   2
@@ -43,34 +44,10 @@ data:
     abs_head   dw 0x00
     abs_track  dw 0x00
 
-; routine for outputting 'si' register on the screen
-proj_e_boot_print:
-    mov ah, 0Eh      ; specify int 10h (teletype output)
-.printchar:
-    lodsb            ; load byte from si into al, increment si
-    cmp al, 0        ; is it the end of the string ?
-    je .done         ; yes => quit ; no => continue
-    int 10h          ; print the character
-    jmp .printchar
-.done:
-    ret
-
-; routine to reboot the machine
-proj_e_boot_reboot:
-    db 0x0ea         ; sending us to the end of the memory, to reboot
-    dw 0x0000
-    dw 0xffff
-
-; routine to get a key press
-proj_e_boot_getkeypress:
-    mov ah, 0
-    int 16h          ; BIOS keyboard service
-    ret
-
 ; LBA to CHS
 ; input  : AX (LBA addr), sectors_per_track, heads_per_track
 ; output : abs_sector (CHS sector addr), abs_head (CHS head addr), abs_track (CHS track addr)
-proj_e_boot_lbachs:
+proj_e_lbachs:
     xor dx, dx       ; dx=0
     div WORD [sectors_per_track]
     inc dl
@@ -86,14 +63,14 @@ proj_e_boot_lbachs:
 ; read sectors
 ; input  : CX (number of sectors to read), AX (LBA addr to start from)
 ; output : ES:BX (loaded sector addr:offset)
-proj_e_boot_readsectors:
-    proj_e_boot_sectorsmain:
+proj_e_readsectors:
+    proj_e_sectorsmain:
         mov di, 0x0005
-    proj_e_boot_sectorsloop:
+    proj_e_sectorsloop:
         push ax
         push bx
         push cx
-        call proj_e_boot_lbachs
+        call proj_e_lbachs
 
         mov ah, 0x02
         mov al, 0x01
@@ -103,7 +80,7 @@ proj_e_boot_readsectors:
         mov dl, BYTE [drive_number]
 
         int 13h
-        jnc proj_e_boot_sectorsdone
+        jnc proj_e_sectorsdone
         xor ax, ax        ; ax=0
         int 13h
         dec di
@@ -112,16 +89,16 @@ proj_e_boot_readsectors:
         pop bx
         pop ax
 
-        jnz proj_e_boot_sectorsloop
+        jnz proj_e_sectorsloop
         int 18h
-    proj_e_boot_sectorsdone:
+    proj_e_sectorsdone:
         pop cx
         pop bx
         pop ax
 
         add bx, WORD [bytes_per_sector]
         inc ax
-        loop proj_e_boot_sectorsmain
+        loop proj_e_sectorsmain
         ret
 
 ; pad to 510 bytes (boot sector - 2)

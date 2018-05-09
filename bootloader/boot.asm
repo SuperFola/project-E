@@ -43,11 +43,12 @@ main:
 
 	mov ax, 0x01       ; LBA number 1 for sector
 	mov cx, 0x01       ; read one sector from the floppy disk
+	mov bx, 0x200
 
 	; call the read sectors function
 	call proj_e_boot_readsectors
 	; address ES offset BX returned from read sectors
-	jmp [es:bx]
+	jmp 0x7e0:0
 
 data:
 	; strings

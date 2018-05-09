@@ -12,8 +12,18 @@ main:
 	mov ds, ax
 
 	mov si, message
-	call proj_e_boot_print
+	call print
 	; jump here
 	jmp $
+
+print:
+	lodsb
+	or al, al
+	jz printdone
+	mov ah, 0eh
+	int 10h
+	jmp print
+printdone:
+	ret
 
 times 512-($-$$) db 0

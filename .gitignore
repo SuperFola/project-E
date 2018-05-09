@@ -3,3 +3,4 @@ cdiso/
 bin/
 obj/
 *.o
+*.swp

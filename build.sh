@@ -1,54 +1,54 @@
 #!/bin/bash
 
 if [ ! -d "cdiso" ]; then
-	mkdir cdiso
+    mkdir cdiso
 fi
 
 if [ ! -d "build" ]; then
-	mkdir build
+    mkdir build
 fi
 
 if [ "$#" -ge "1" ]; then
-	good=0
-	if [ "$1" == "kerasm" ]; then
-		cd kernel && ./build.sh asm && cd .. && echo
-		good=1
-	else
-		if [ "$1" == "kerc" ]; then
-			cd kernel && ./build.sh c && cd .. && echo
-			good=1
-		fi
-	fi
+    good=0
+    if [ "$1" == "kerasm" ]; then
+        cd kernel && ./build.sh asm && cd .. && echo
+        good=1
+    else
+        if [ "$1" == "kerc" ]; then
+            cd kernel && ./build.sh c && cd .. && echo
+            good=1
+        fi
+    fi
 
-	if [ "$good" -eq "1" ]; then
-		cd bootloader && ./build.sh && cd .. && echo
-		cat bootloader/build/bootloader.bin kernel/build/kernel.bin > build/proj_e-bootker.bin
-		dd status=noxfer conv=notrunc if=build/proj_e-bootker.bin of=build/floopy_proj_e-bootker.fda
-		#dd if=/dev/zero                       of=build/proj_e.img bs=512              count=2880
-		#dd if=bootloader/build/bootloader.bin of=build/proj_e.img bs=512 conv=notrunc
-		#dd if=kernel/build/kernel.bin         of=build/proj_e.img bs=512 conv=notrunc seek=1
+    if [ "$good" -eq "1" ]; then
+        cd bootloader && ./build.sh && cd .. && echo
+        cat bootloader/build/bootloader.bin kernel/build/kernel.bin > build/proj_e-bootker.bin
+        dd status=noxfer conv=notrunc if=build/proj_e-bootker.bin of=build/floopy_proj_e-bootker.fda
+        #dd if=/dev/zero                       of=build/proj_e.img bs=512              count=2880
+        #dd if=bootloader/build/bootloader.bin of=build/proj_e.img bs=512 conv=notrunc
+        #dd if=kernel/build/kernel.bin         of=build/proj_e.img bs=512 conv=notrunc seek=1
 
-		if [ "$#" -eq "1" ]; then
-			exit 0
-		fi
-	fi
+        if [ "$#" -eq "1" ]; then
+            exit 0
+        fi
+    fi
 
-	if [ "$#" -eq "2" ]; then
-		if [ "$2" == "qemu" ]; then
-			qemu-system-x86_64 -fda build/floopy_proj_e-bootker.fda
-			exit 0
-		fi
-	fi
+    if [ "$#" -eq "2" ]; then
+        if [ "$2" == "qemu" ]; then
+            qemu-system-x86_64 -fda build/floopy_proj_e-bootker.fda
+            exit 0
+        fi
+    fi
 else
-	echo Building ISO
-	echo Need to fix the command before continuing ! && exit 1
+    echo Building ISO
+    echo Need to fix the command before continuing ! && exit 1
 
-	cd bootloader && ./build.sh && cd ..
-	cp bootloader/build/bootloader.flp cdiso/
+    cd bootloader && ./build.sh && cd ..
+    cp bootloader/build/bootloader.flp cdiso/
 
-	mkisofs -o build/project_e.iso -b bootloader.flp cdiso/
+    mkisofs -o build/project_e.iso -b bootloader.flp cdiso/
 
-	exit 0
+    exit 0
 fi
 
 # if we are here we probably missed a "if"

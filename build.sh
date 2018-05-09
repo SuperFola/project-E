@@ -8,37 +8,19 @@ if [ ! -d "build" ]; then
     mkdir build
 fi
 
-if [ "$#" -ge "1" ]; then
-    good=0
-    if [ "$1" == "kerasm" ]; then
-        cd kernel && ./build.sh asm && cd .. && echo
-        good=1
-    else
-        if [ "$1" == "kerc" ]; then
-            cd kernel && ./build.sh c && cd .. && echo
-            good=1
-        fi
-    fi
+if [ "$#" -eq "1" ] && [ "$1" == "qemu" ]; then
+    nasm -f bin -o build/kernel.bin kernel.asm
+    echo Kernel built
 
-    if [ "$good" -eq "1" ]; then
-        cd bootloader && ./build.sh && cd .. && echo
-        cat bootloader/build/bootloader.bin kernel/build/kernel.bin > build/proj_e-bootker.bin
-        dd status=noxfer conv=notrunc if=build/proj_e-bootker.bin of=build/floopy_proj_e-bootker.fda
-        #dd if=/dev/zero                       of=build/proj_e.img bs=512              count=2880
-        #dd if=bootloader/build/bootloader.bin of=build/proj_e.img bs=512 conv=notrunc
-        #dd if=kernel/build/kernel.bin         of=build/proj_e.img bs=512 conv=notrunc seek=1
+    nasm -f bin -o build/bootloader.bin boot.asm
+    echo Bootloader built
 
-        if [ "$#" -eq "1" ]; then
-            exit 0
-        fi
-    fi
+    cat build/bootloader.bin build/kernel.bin > build/proj_e-bootker.bin
+    dd status=noxfer conv=notrunc if=build/proj_e-bootker.bin of=build/floopy_proj_e-bootker.fda
+    echo Floppy drive built
 
-    if [ "$#" -eq "2" ]; then
-        if [ "$2" == "qemu" ]; then
-            qemu-system-x86_64 -fda build/floopy_proj_e-bootker.fda
-            exit 0
-        fi
-    fi
+    qemu-system-x86_64 -fda build/floopy_proj_e-bootker.fda
+    exit 0
 else
     echo Building ISO
     echo Need to fix the command before continuing ! && exit 1
@@ -53,7 +35,5 @@ fi
 
 # if we are here we probably missed a "if"
 echo "No  argument : build the ISO"
-echo "1st argument : kerasm => build the bootloader and the asm kernel together"
-echo "               kerc   => build the bootloader and the c kernel together"
-echo "2nd argument : qemu   => after having built the floopy, run qemu"
+echo "1st argument : qemu   => after having built the floppy, run qemu"
 exit 1

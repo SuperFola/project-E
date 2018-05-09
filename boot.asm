@@ -3,15 +3,15 @@ bits 16
 start:
     jmp main
 
-%include "../std/stdio.inc"
+%include "std/stdio.inc"
 
 main:
     cli              ; move registers for offset of BIOS 07C0h load point
     mov ax, 07C0h    ; offset
     mov ds, ax
     mov es, ax
-    mov fs, ax
-    mov gs, ax
+    ; mov fs, ax
+    ; mov gs, ax
 
     mov ax, 0x0000   ; init the stack
     mov ss, ax

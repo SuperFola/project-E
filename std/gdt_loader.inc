@@ -8,4 +8,7 @@ proj_e_installGDT16:
     popa        ; restore registers
     ret         ; we are done
 
-%include "gdt.inc"
+%include "std/gdt.inc"
+
+%define CODE_DESC 0x08
+%define DATA_DESC 0x10

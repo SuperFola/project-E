@@ -20,7 +20,7 @@ main:
 
     mov si, message
     call proj_e_print16
-    call proj_e_getkeypress16
+    call proj_e_waitkeypress16
 
     mov ax, 0x01       ; LBA number 1 for sector
     mov cx, 0x04       ; read 4 sectors from the floppy disk

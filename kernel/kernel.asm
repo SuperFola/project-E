@@ -8,10 +8,12 @@ data:
 	message db 'Kernel loaded', 13, 10, 0
 
 main:
+	mov ax, cs
+	mov ds, ax
+
 	mov si, message
 	call proj_e_boot_print
 	; jump here
 	jmp $
 
-times 510-($-$$) db 0
-dw 0xAA55
+times 512-($-$$) db 0

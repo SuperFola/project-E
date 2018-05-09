@@ -19,4 +19,4 @@ main:
     ; jump here
     jmp $
 
-times 1024-($-$$) db 0
+times 2048-($-$$) db 0

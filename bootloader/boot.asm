@@ -23,7 +23,7 @@ main:
     call proj_e_getkeypress16
 
     mov ax, 0x01       ; LBA number 1 for sector
-    mov cx, 0x02       ; read two sectors from the floppy disk
+    mov cx, 0x04       ; read 4 sectors from the floppy disk
     mov bx, 0x200
     ; call the read sectors function
     call proj_e_readsectors

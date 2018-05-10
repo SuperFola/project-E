@@ -1,1 +1,1 @@
-apt-get install nano nasm qemu
+apt-get install nano make build-essentials nasm qemu

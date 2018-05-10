@@ -9,8 +9,7 @@ It was developped and tested under Lubuntu 18.04, on a x86_64 machine.
 ```bash
 ~$ cd project-E-master
 ~/project-E-master$ sudo ./configure.sh  # to install the dependencies
-~/project-E-master$ ./build.sh kerasm qemu  # we are telling the build script to compile the ASM kernel and to boot qemu with
-                                            # the generated .fda file
+~/project-E-master$ make && ./run.sh qemu
 ```
 
 ## Bug report

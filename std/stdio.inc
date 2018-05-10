@@ -31,18 +31,17 @@ proj_e_waitkeypress16:
 ; Routine: Get String from User
 ; Waits for a complete string of user input and puts it in buffer.
 ; Sensitive for backspace and Enter buttons
-; Input    1. Buffer in DI
+; Input    1. Buffer in DI, character limit in CH
 ; Output   2. Input char in buffer
 ; ----------------------------------------------------------
 proj_e_get_user_input:
-  xor cl, cl       ; CL will be our counter that keeps track of the number of characters the user has entered.
-                   ; XORing cl by itself will set it to zero.
-
-  .get_char_and_add_to_buffer:
-
-    mov ah, 0      ; We use bios interrupt 16h to capture user input.
+    cld
+    xor cl, cl       ; CL will be our counter to keep track of the number of characters the user has entered.
+                     ; XORing cl by itself will set it to zero.
+.get_char_and_add_to_buffer:
+    xor ah, ah     ; We use bios interrupt 16h to capture user input.
                    ; AH=0 is an option for 16h that tells the interrupt to read the user input character
-    int 16h      ; call interrupt. Stores read character in AL
+    int 16h        ; call interrupt. Stores read character in AL
 
     ; backspace button listener
     cmp al, 0x08   ; compares user input to the backspace button, stores result in Carry Flag
@@ -53,30 +52,33 @@ proj_e_get_user_input:
     je .enter_pressed        ; go to appropriate subroutine for enter button
 
     ; input counter
-    cmp cl, 0x80   ; Has the user entered 128 bytes yet? (buffer limit is 128)
+    cmp cl, ch         ; Has the user entered 'ch' bytes yet? (buffer limit is in register ch)
     je .buffer_overflow
 
     ; User input is normal character
 
     ; print input
     mov ah, 0x0E   ; Teletype mode
-    int 10h      ; Print interrupt
+    int 10h        ; Print interrupt
 
-    stosb          ; puts character in buffer
+    ; puts character in buffer
+    ; stosb
+    mov [di], al
+    inc di
+
     inc cl         ; increment counter
     jmp .get_char_and_add_to_buffer    ; recurse
 
-
-  ; // Subroutines
-  .backspace_pressed:
+; // Subroutines
+.backspace_pressed:
     cmp cl, 0      ; no point erasing anything if no input has been entered
     je .get_char_and_add_to_buffer   ; ignore backspace press
 
     ; Delete last input character from buffer
-                 ; When you use stosb, movsb or similar functions, the system implicitly uses the SI and DI registers.
-    dec di         ; Therefore we need to decrement di to get to the last input character and erase it.
-    mov byte[di],0 ; Erases the byte at location [di]
-    dec cl         ; decrement our counter
+        ; When you use stosb, movsb or similar functions, the system implicitly uses the SI and DI registers.
+    dec di           ; Therefore we need to decrement di to get to the last input character and erase it.
+    mov byte [di], 0 ; Erases the byte at location [di]
+    dec cl           ; decrement our counter
 
     ; Erase character from display
     mov ah, 0x0E   ; Teletype mode again
@@ -91,20 +93,21 @@ proj_e_get_user_input:
 
     jmp .get_char_and_add_to_buffer    ; go back to main routine
 
-
-  ; enter button pressed. Jump to exit
-  .enter_pressed:
+; enter button pressed. Jump to exit
+.enter_pressed:
     jmp .exit_routine
 
-
-  ; buffer overflow (buffer is full). Don't accept any more chars and exit routine.
-  .buffer_overflow:
+; buffer overflow (buffer is full). Don't accept any more chars and exit routine.
+.buffer_overflow:
     jmp .exit_routine
 
-
-  .exit_routine:
+.exit_routine:
     mov al, 0       ; end of user input signal
-    stosb
+
+    ; stosb
+    mov [di], al
+    inc di
+
     mov ah, 0x0E
     mov al, 0x0D    ; new line
     int 0x10
@@ -112,8 +115,6 @@ proj_e_get_user_input:
     int 0x10
 
     ret             ; exit entire routine
-
-
 
 ; ----------------------------------------------------------
 ; Routine: Compare equality of two strings

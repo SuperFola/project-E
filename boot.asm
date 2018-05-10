@@ -6,17 +6,17 @@ start:
 %include "std/stdio.inc"
 
 main:
-    cli              ; move registers for offset of BIOS 07C0h load point
+    ; cli              ; move registers for offset of BIOS 07C0h load point
     mov ax, 07C0h    ; offset
     mov ds, ax
     mov es, ax
-    ; mov fs, ax
-    ; mov gs, ax
+    mov fs, ax
+    mov gs, ax
 
     mov ax, 0x0000   ; init the stack
     mov ss, ax
     mov sp, 0xffff
-    sti
+    ; sti
 
     mov si, message
     call proj_e_print16
@@ -24,7 +24,7 @@ main:
 
     mov ax, 0x01       ; LBA number 1 for sector
     mov cx, 0x04       ; read 4 sectors from the floppy disk
-    mov bx, 0x200
+    mov bx, ADDR_KERNEL_OFFSET
     ; call the read sectors function
     call proj_e_readsectors
 
@@ -35,6 +35,7 @@ data:
     ; strings
     message    db 'Hello World! Press any key to load the kernel', 13, 10, 0
     ; parameters
+    ADDR_KERNEL_OFFSET equ 512
     sectors_per_track  dw  18
     heads_per_track    dw   2
     bytes_per_sector   dw 512

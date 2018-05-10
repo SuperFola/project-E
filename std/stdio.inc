@@ -8,7 +8,7 @@
 
 bits 16
 
-STACK_SEG16 equ  0x9000
+STACK_SEG16 equ   0x7c0
 STACK_SEG32 equ 0x90000
 STACK_SIZE  equ  0xffff
 SCREEN_SEG  equ  0xb800

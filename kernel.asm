@@ -1,5 +1,4 @@
 bits 16
-org 0x00
 
 start:
     jmp main
@@ -10,28 +9,27 @@ start:
 ; %include "std/stdio32.inc"
 
 data:
-    msg_ker db 'Kernel loaded',  13, 10, 0
-    msg_gdt db 'GDT installed',  13, 10, 0
-    msg_a20 db 'A20 enabled',    13, 10, 0
-    msg_32B db 'Entering pmode', 13, 10, 0
-
+    msg_ker  db 'Kernel loaded',  13, 10, 0
+    msg_gdt  db 'GDT installed',  13, 10, 0
+    msg_gdt_error db '[!] GDT already installed', 13, 10, 0
+    msg_a20  db 'A20 enabled',    13, 10, 0
+    msg_32B  db 'Entering pmode', 13, 10, 0
+    msg_info db 'Project E is developped by SuperFola', 13, 10, 0
     ret_line db 13, 10, 0
 
-    STACK_SEG  equ 0x90000
-    STACK_SIZE equ 0xffff
-    SCREEN_SEG equ 0xb800
-
     buffer times 72 db 0
+    flag_gdt_installed db 0
 
-    shell_cursor       db '$ ',     0
+    shell_cursor       db 'kernel> ',     0
     shell_command_help db 'help',   0
-    shell_action_help  db 'lgdt a20 pmode reboot', 13, 10, 0
+    shell_action_help  db 'lgdt a20 pmode reboot info', 13, 10, 0
     shell_command_lgdt db 'lgdt',   0
     shell_command_a20  db 'a20',    0
     shell_command_32B  db 'pmode',  0
     shell_command_rbt  db 'reboot', 0
+    shell_command_info db 'info',   0
 
-    shell_error_wrong_command db 'Wrong input', 13, 10, 0
+    shell_error_wrong_command db 'Unknown command', 13, 10, 0
 
 main:
     mov ax, cs
@@ -42,6 +40,8 @@ main:
     call proj_e_print16
 
 shell_begin:
+    mov si, ret_line
+    call proj_e_print16
     mov si, shell_cursor       ; print cursor
     call proj_e_print16
 
@@ -50,11 +50,8 @@ shell_begin:
     mov ch, 72                 ; character limit
     call proj_e_get_user_input ; wait for user input
 
-    ; echo back (ATM)
-    mov si, buffer             ; copy user input to SI
-    call proj_e_print16
-    mov si, ret_line
-    call proj_e_print16
+    ; to be able to do the comparisons tests
+    mov si, buffer
 
     ; checks if user typed help command
     mov di, shell_command_help
@@ -76,10 +73,15 @@ shell_begin:
     call proj_e_compare_string
     jc .command_32B
 
-    ; check if user typed reboot commande
+    ; check if user typed reboot command
     mov di, shell_command_rbt
     call proj_e_compare_string
     jc .command_rbt
+
+    ; check if user typed info command
+    mov di, shell_command_info
+    call proj_e_compare_string
+    jc .command_info
 
 ; wrong user input (command not recognized)
 .wrong_input_error:
@@ -96,8 +98,17 @@ shell_begin:
 ; command lgdt (shell_command_lgdt) selected
 .command_lgdt:
     ; loading the Global Descriptor Table
+    mov cl, 1
+    cmp cl, byte [flag_gdt_installed]
+    je .command_lgdt_error
+
     call proj_e_installGDT16
     mov si, msg_gdt
+    call proj_e_print16
+    mov byte [flag_gdt_installed], 1
+    jmp shell_begin
+.command_lgdt_error:
+    mov si, msg_gdt_error
     call proj_e_print16
     jmp shell_begin
 
@@ -113,23 +124,27 @@ shell_begin:
 .command_32B:
     mov si, msg_32B
     call proj_e_print16
-
     ; starting the protected mode configuration
     cli
     mov eax, cr0  ; set bit0 : enter pmode
     or eax, 1
     mov cr0, eax
-
+    ; jump here
+    jmp $
+    ; not working :c !
     jmp CODE_DESC:kernel32 ; doing a far jump to fix CS
     ; from now, do not re-enable interrupts !!
     ; it would cause triple fault :c
 
-    ; jump here
-    jmp $
-
-; commande reboot (shell_command_rbt) selected
+; command reboot (shell_command_rbt) selected
 .command_rbt:
     call proj_e_reboot16
+
+; command info (command_info) selected
+.command_info:
+    mov si, msg_info
+    call proj_e_print16
+    jmp shell_begin
 
 ; ***********************
 ;        Kernel 32
@@ -142,10 +157,8 @@ kernel32:
     mov ds, ax
     mov ss, ax
     mov es, ax
-    mov fs, ax
-    mov gs, ax
 
-    mov ebp, STACK_SEG
+    mov ebp, STACK_SEG32
     mov esp, ebp
 
 stop:

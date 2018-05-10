@@ -1,49 +1,55 @@
 bits 16
+;org 0x7c00
 
 start:
     jmp main
 
 %include "std/stdio.inc"
 
+data:
+    ; strings
+    new_line db 13, 10, 0
+    message  db 'Project E', 13, 10, '=========', 13, 10, 13, 10, '[Bootloader ready] Press any key to load the kernel', 0
+    ; parameters
+    ADDR_KERNEL_OFFSET equ 512
+    KERNEL_BLOCKS_SIZE equ   4
+    sectors_per_track  dw   18
+    heads_per_track    dw    2
+    bytes_per_sector   dw  512
+    drive_number       dw    0
+    ; variables
+    abs_sector dw 0x00
+    abs_head   dw 0x00
+    abs_track  dw 0x00
+
 main:
-    ; cli              ; move registers for offset of BIOS 07C0h load point
-    mov ax, 07C0h    ; offset
+    cli              ; move registers for offset of BIOS 0x7c0 load point
+    mov ax, 0x7c0    ; offset
+    ;xor ax, ax
     mov ds, ax
     mov es, ax
-    mov fs, ax
-    mov gs, ax
 
-    mov ax, 0x0000   ; init the stack
+    mov ax, STACK_SEG16    ;0x0000   ; init the stack
     mov ss, ax
-    mov sp, 0xffff
-    ; sti
+    mov sp, STACK_SIZE
+    sti
 
+    ; display message on startup
     mov si, message
     call proj_e_print16
     call proj_e_waitkeypress16
+    mov si, new_line
+    call proj_e_print16
 
-    mov ax, 0x01       ; LBA number 1 for sector
-    mov cx, 0x04       ; read 4 sectors from the floppy disk
+    ; prepare to load the kernel
+    mov ax, 0x01                  ; LBA number 1 for sector
+    mov cx, KERNEL_BLOCKS_SIZE    ; read sectors from the floppy disk
     mov bx, ADDR_KERNEL_OFFSET
     ; call the read sectors function
     call proj_e_readsectors
 
     ; address ES offset BX returned from read sectors (call kernel)
     jmp 0x7e0:0
-
-data:
-    ; strings
-    message    db 'Hello World! Press any key to load the kernel', 13, 10, 0
-    ; parameters
-    ADDR_KERNEL_OFFSET equ 512
-    sectors_per_track  dw  18
-    heads_per_track    dw   2
-    bytes_per_sector   dw 512
-    drive_number       dw   0
-    ; variables
-    abs_sector dw 0x00
-    abs_head   dw 0x00
-    abs_track  dw 0x00
 
 ; LBA to CHS
 ; input  : AX (LBA addr), sectors_per_track, heads_per_track

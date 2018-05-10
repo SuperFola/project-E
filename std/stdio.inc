@@ -1,7 +1,17 @@
 %ifndef stdio_h_1337
 %define stdio_h_1337
 
+%macro mystosb16_di 0
+    mov [di], al
+    inc di
+%endmacro
+
 bits 16
+
+STACK_SEG16 equ  0x9000
+STACK_SEG32 equ 0x90000
+STACK_SIZE  equ  0xffff
+SCREEN_SEG  equ  0xb800
 
 ; routine for outputting 'si' register on the screen
 proj_e_print16:
@@ -62,9 +72,7 @@ proj_e_get_user_input:
     int 10h        ; Print interrupt
 
     ; puts character in buffer
-    ; stosb
-    mov [di], al
-    inc di
+    mystosb16_di
 
     inc cl         ; increment counter
     jmp .get_char_and_add_to_buffer    ; recurse
@@ -103,10 +111,7 @@ proj_e_get_user_input:
 
 .exit_routine:
     mov al, 0       ; end of user input signal
-
-    ; stosb
-    mov [di], al
-    inc di
+    mystosb16_di
 
     mov ah, 0x0E
     mov al, 0x0D    ; new line

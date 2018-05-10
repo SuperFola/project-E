@@ -1,5 +1,4 @@
 bits 16
-;org 0x7c00
 
 start:
     jmp main
@@ -25,11 +24,10 @@ data:
 main:
     cli              ; move registers for offset of BIOS 0x7c0 load point
     mov ax, 0x7c0    ; offset
-    ;xor ax, ax
     mov ds, ax
     mov es, ax
 
-    mov ax, STACK_SEG16    ;0x0000   ; init the stack
+    mov ax, STACK_SEG16          ; init the stack
     mov ss, ax
     mov sp, STACK_SIZE
     sti
@@ -56,14 +54,14 @@ main:
 ; output : abs_sector (CHS sector addr), abs_head (CHS head addr), abs_track (CHS track addr)
 proj_e_lbachs:
     xor dx, dx       ; dx=0
-    div WORD [sectors_per_track]
+    div word [sectors_per_track]
     inc dl
-    mov BYTE [abs_sector], dl
+    mov byte [abs_sector], dl
 
     xor dx, dx       ; dx=0
-    div WORD [heads_per_track]
-    mov BYTE [abs_head], dl
-    mov BYTE [abs_track], al
+    div word [heads_per_track]
+    mov byte [abs_head], dl
+    mov byte [abs_track], al
 
     ret
 
@@ -81,10 +79,10 @@ proj_e_readsectors:
 
         mov ah, 0x02
         mov al, 0x01
-        mov ch, BYTE [abs_track]
-        mov cl, BYTE [abs_sector]
-        mov dh, BYTE [abs_head]
-        mov dl, BYTE [drive_number]
+        mov ch, byte [abs_track]
+        mov cl, byte [abs_sector]
+        mov dh, byte [abs_head]
+        mov dl, byte [drive_number]
 
         int 13h
         jnc proj_e_sectorsdone
@@ -103,7 +101,7 @@ proj_e_readsectors:
         pop bx
         pop ax
 
-        add bx, WORD [bytes_per_sector]
+        add bx, word [bytes_per_sector]
         inc ax
         loop proj_e_sectorsmain
         ret

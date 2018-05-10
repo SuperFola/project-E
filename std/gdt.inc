@@ -1,12 +1,12 @@
 ; Offset 0 in GDT: Descriptor code=0x00
 
-gdt_start:
+gdt:
 gdt_null:
     dd 0           ; null descriptor
     dd 0
 
 ; Offset 0x8 bytes from start of GDT: Descriptor code therfore is 0x08
-gdt_code:          ; code descriptor
+CODE_DESC equ $-gdt  ; code descriptor
     dw 0FFFFh      ; limit low
     dw 0           ; base low
     db 0           ; base middle
@@ -15,7 +15,7 @@ gdt_code:          ; code descriptor
     db 0           ; base high
 
 ; Offset 16 bytes (0x10) from start of GDT. Descriptor code therfore is 0x10
-gdt_data:          ; data descriptor
+DATA_DESC equ $-gdt  ; data descriptor
     dw 0FFFFh      ; limit low (Same as code)
     dw 0           ; base low
     db 0           ; base middle
@@ -24,9 +24,6 @@ gdt_data:          ; data descriptor
     db 0           ; base high
 
 gdt_end:
-toc:
-    dw gdt_end - gdt_start - 1      ; limit (Size of GDT)
-    dd gdt_start                    ; base of GDT
-
-CODE_DESC equ gdt_code - gdt_start
-DATA_DESC equ gdt_data - gdt_start
+gdt_table:
+    dw gdt_end - gdt - 1      ; limit (Size of GDT)
+    dd gdt                    ; base of GDT

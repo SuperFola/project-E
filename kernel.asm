@@ -8,6 +8,8 @@ start:
 %include "std/A20.inc"
 ; %include "std/stdio32.inc"
 
+%define DATA16_RELOC(x) (x + 0x1000)
+
 data:
     msg_ker  db 'Kernel loaded',  13, 10, 0
     msg_gdt  db 'GDT installed',  13, 10, 0
@@ -97,11 +99,11 @@ shell_begin:
 
 ; command lgdt (shell_command_lgdt) selected
 .command_lgdt:
-    ; loading the Global Descriptor Table
+    ; did we already load the GDT ?
     mov cl, 1
     cmp cl, byte [flag_gdt_installed]
     je .command_lgdt_error
-
+    ; loading the Global Descriptor Table
     call proj_e_installGDT16
     mov si, msg_gdt
     call proj_e_print16
@@ -129,10 +131,9 @@ shell_begin:
     mov eax, cr0  ; set bit0 : enter pmode
     or eax, 1
     mov cr0, eax
-    ; jump here
-    jmp $
+
     ; not working :c !
-    jmp CODE_DESC:kernel32 ; doing a far jump to fix CS
+    jmp dword 0x08:DATA16_RELOC(kernel32) ; doing a far jump to fix CS
     ; from now, do not re-enable interrupts !!
     ; it would cause triple fault :c
 
@@ -162,7 +163,8 @@ kernel32:
     mov esp, ebp
 
 stop:
-    cli
-    hlt
+    ; cli
+    ; hlt
+    jmp $
 
 times 2048-($-$$) db 0

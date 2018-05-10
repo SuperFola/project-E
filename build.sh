@@ -8,18 +8,26 @@ if [ ! -d "build" ]; then
     mkdir build
 fi
 
-if [ "$#" -eq "1" ] && [ "$1" == "qemu" ]; then
+if [ "$#" -eq "1" ]; then
     nasm -g -f bin -o build/kernel.bin kernel.asm
     echo Kernel built
 
     nasm -g -f bin -o build/bootloader.bin boot.asm
     echo Bootloader built
 
-    cat build/bootloader.bin build/kernel.bin > build/proj_e-bootker.bin
-    dd status=noxfer conv=notrunc if=build/proj_e-bootker.bin of=build/floopy_proj_e-bootker.fda
+    cat build/bootloader.bin build/kernel.bin > build/proj_e.bin
+    dd status=noxfer conv=notrunc if=build/proj_e.bin of=build/proj_e.img
     echo Floppy drive built
 
-    qemu-system-i386 -fda build/floopy_proj_e-bootker.fda
+    if [ "$1" == "qemu" ]; then
+        qemu-system-i386 -fda build/proj_e.img
+    else
+        if [ "$1" == "bochs" ]; then
+            #sudo losetup /dev/loop0 build/proj_e.img
+            bochs
+            #sudo losetup -d /dev/loop0
+        fi
+    fi
     exit 0
 else
     echo Building ISO

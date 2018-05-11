@@ -1,6 +1,6 @@
 # Project E
 
-Project E is a small Operating System (if we can say so) composed of a basic bootloader and of a simple kernel, capable of loading a given application an executing it.
+Project E is a small Operating System (if we can say so) composed of a basic bootloader and of a simple kernel, capable of execute shell commands.
 
 It was developped and tested under Lubuntu 18.04, on a x86_64 machine.
 
@@ -10,6 +10,25 @@ It was developped and tested under Lubuntu 18.04, on a x86_64 machine.
 ~$ cd project-E-master
 ~/project-E-master$ sudo ./configure.sh  # to install the dependencies
 ~/project-E-master$ make && ./run.sh qemu
+```
+
+## Burning on an USB key
+
+```bash
+~$ cd project-E-master
+~/project-E-master$ sudo fdisk -l
+# ...
+# find the USB you want to burn the ISO to
+# WARNING : it will completly wipe the data on this USB disk !
+# You have been warned, IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.    (see MIT License)
+~/project-E-master$ ./deploy.sh /dev/sdX  # here my disk is /dev/sdX
+                                          # replace by yours before executing the command
+~/project-E-master$ sudo qemu-system-i386 -cdrom /dev/sdX # testing the installation
+
 ```
 
 ## Bug report

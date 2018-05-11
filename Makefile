@@ -1,8 +1,8 @@
 all: image
 
 image: build bootloader kernel
-	cat build/bootloader.bin build/kernel.bin > build/proj_e.bin
-	dd status=noxfer conv=notrunc if=build/proj_e.bin of=build/proj_e.img
+	cat build/bootloader.bin build/kernel.bin > build/project_e.bin
+	dd status=noxfer conv=notrunc if=build/project_e.bin of=build/project_e.img
 
 build:
 	mkdir build

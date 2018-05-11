@@ -1,257 +1,71 @@
 %ifndef video_h_1337
 %define video_h_1337
 
+%define VIDMEM  0xb800   ; video memory
+%define COLS        80   ; width and height of screen
+%define LINES       25
 
-%define		VIDMEM	0xB8000			; video memory
-%define		COLS	80			; width and height of screen
-%define		LINES	25
-%define		CHAR_ATTRIB 63			; character attribute (White text on light blue background)
+%define CHAR_ATTR_BLACK    0
+%define CHAR_ATTR_BLUE     1
+%define CHAR_ATTR_GREEN    2
+%define CHAR_ATTR_CYAN     3
+%define CHAR_ATTR_RED      4
+%define CHAR_ATTR_MAGENT   5
+%define CHAR_ATTR_BROWN    6
+%define CHAR_ATTR_LGREY    7
+%define CHAR_ATTR_DGREY    8
+%define CHAR_ATTR_LBLUE    9
+%define CHAR_ATTR_LGREEN  10
+%define CHAR_ATTR_LCYAN   11
+%define CHAR_ATTR_LRED    12
+%define CHAR_ATTR_LMAGENT 13
+%define CHAR_ATTR_YELLOW  14
+%define CHAR_ATTR_WHITE   15
 
-_CurX db 0					; current x/y location
-_CurY db 0
+%define CREATE_COLOUR(fg, bg) ((fg) + (bg) * 16)
 
-;**************************************************;
-;	Putch32 ()
-;		- Prints a character to screen
-;	BL => Character to print
-;**************************************************;
+%define CA_WHITE_ON_BLUE 0x3f
 
-Putch32:
+; Routine to clear the screen
+; INPUT  : AH (color to use to clear the screen)
+; OUTPUT : none
+proj_e_clear_screen16:
+    mov bx, VIDMEM
+    mov es, bx
+    mov al, ' '
+    mov cx, 2000   ; COLS*LINES
+    xor di, di     ; video offset=0
+    rep stosw
 
-	pusha				; save registers
-	mov	edi, VIDMEM		; get pointer to video memory
+    ret
 
-	;-------------------------------;
-	;   Get current position	;
-	;-------------------------------;
+; Routine to move the cursor on the screen
+; INPUT  : CH (y position), CL (x position)
+; OUTPUT : none
+proj_e_move_cursor16:
+    mov dl, cl   ; set position of cursor
+    mov dh, ch
 
-	xor	eax, eax		; clear eax
-
-		;--------------------------------
-		; Remember: currentPos = x + y * COLS! x and y are in _CurX and _CurY.
-		; Because there are two bytes per character, COLS=number of characters in a line.
-		; We have to multiply this by 2 to get number of bytes per line. This is the screen width,
-		; so multiply screen with * _CurY to get current line
-		;--------------------------------
-
-		mov	ecx, COLS*2		; Mode 7 has 2 bytes per char, so its COLS*2 bytes per line
-		mov	al, byte [_CurY]	; get y pos
-		mul	ecx			; multiply y*COLS
-		push	eax			; save eax--the multiplication
-
-		;--------------------------------
-		; Now y * screen width is in eax. Now, just add _CurX. But, again remember that _CurX is relative
-		; to the current character count, not byte count. Because there are two bytes per character, we
-		; have to multiply _CurX by 2 first, then add it to our screen width * y.
-		;--------------------------------
-
-		mov	al, byte [_CurX]	; multiply _CurX by 2 because it is 2 bytes per char
-		mov	cl, 2
-		mul	cl
-		pop	ecx			; pop y*COLS result
-		add	eax, ecx
-
-		;-------------------------------
-		; Now eax contains the offset address to draw the character at, so just add it to the base address
-		; of video memory (Stored in edi)
-		;-------------------------------
-
-		xor	ecx, ecx
-		add	edi, eax		; add it to the base address
-
-	;-------------------------------;
-	;   Watch for new line          ;
-	;-------------------------------;
-
-	cmp	bl, 0x0A		; is it a newline character?
-	je	.Row			; yep--go to next row
-
-	;-------------------------------;
-	;   Print a character           ;
-	;-------------------------------;
-
-	mov	dl, bl			; Get character
-	mov	dh, CHAR_ATTRIB		; the character attribute
-	mov	word [edi], dx		; write to video display
-
-	;-------------------------------;
-	;   Update next position        ;
-	;-------------------------------;
-
-	inc	byte [_CurX]		; go to next character
-;	cmp	byte [_CurX], COLS		; are we at the end of the line?
-;	je	.Row			; yep-go to next row
-	jmp	.done			; nope, bail out
-
-	;-------------------------------;
-	;   Go to next row              ;
-	;-------------------------------;
-
-.Row:
-	mov	byte [_CurX], 0		; go back to col 0
-	inc	byte [_CurY]		; go to next row
-
-	;-------------------------------;
-	;   Restore registers & return  ;
-	;-------------------------------;
-
-.done:
-	popa				; restore registers and return
-	ret
-
-;**************************************************;
-;	Puts32 ()
-;		- Prints a null terminated string
-;	parm\ EBX = address of string to print
-;**************************************************;
-
-Puts32:
-
-	;-------------------------------;
-	;   Store registers             ;
-	;-------------------------------;
-
-	pusha				; save registers
-	push	ebx			; copy the string address
-	pop	edi
-
-.loop:
-
-	;-------------------------------;
-	;   Get character               ;
-	;-------------------------------;
-
-	mov	bl, byte [edi]		; get next character
-	cmp	bl, 0			; is it 0 (Null terminator)?
-	je	.done			; yep-bail out
-
-	;-------------------------------;
-	;   Print the character         ;
-	;-------------------------------;
-
-	call	Putch32			; Nope-print it out
-
-	;-------------------------------;
-	;   Go to next character        ;
-	;-------------------------------;
-
-	inc	edi			; go to next character
-	jmp	.loop
-
-.done:
-
-	;-------------------------------;
-	;   Update hardware cursor      ;
-	;-------------------------------;
-
-	; Its more efficiant to update the cursor after displaying
-	; the complete string because direct VGA is slow
-
-	mov	bh, byte [_CurY]	; get current position
-	mov	bl, byte [_CurX]
-	call	MovCur			; update cursor
-
-	popa				; restore registers, and return
-	ret
-
-;**************************************************;
-;	MoveCur ()
-;		- Update hardware cursor
-;	parm/ bh = Y pos
-;	parm/ bl = x pos
-;**************************************************;
-
-MovCur:
-
-	pusha				; save registers (aren't you getting tired of this comment?)
-
-	;-------------------------------;
-	;   Get current position        ;
-	;-------------------------------;
-
-	; Here, _CurX and _CurY are relitave to the current position on screen, not in memory.
-	; That is, we don't need to worry about the byte alignment we do when displaying characters,
-	; so just follow the forumla: location = _CurX + _CurY * COLS
-
-	xor	eax, eax
-	mov	ecx, COLS
-	mov	al, bh			; get y pos
-	mul	ecx			; multiply y*COLS
-	add	al, bl			; Now add x
-	mov	ebx, eax
-
-	;--------------------------------------;
-	;   Set low byte index to VGA register ;
-	;--------------------------------------;
-
-	mov	al, 0x0f
-	mov	dx, 0x03D4
-	out	dx, al
-
-	mov	al, bl
-	mov	dx, 0x03D5
-	out	dx, al			; low byte
-
-	;---------------------------------------;
-	;   Set high byte index to VGA register ;
-	;---------------------------------------;
-
-	xor	eax, eax
-
-	mov	al, 0x0e
-	mov	dx, 0x03D4
-	out	dx, al
-
-	mov	al, bh
-	mov	dx, 0x03D5
-	out	dx, al			; high byte
-
-	popa
-	ret
-
-;**************************************************;
-;	ClrScr32 ()
-;		- Clears screen
-;**************************************************;
-
-ClrScr32:
-
-	pusha
-	cld
-	mov	edi, VIDMEM
-	mov	cx, 2000
-	mov	ah, CHAR_ATTRIB
-	mov	al, ' '	
-	rep	stosw
-
-	mov	byte [_CurX], 0
-	mov	byte [_CurY], 0
-	popa
-	ret
-
-;**************************************************;
-;	GotoXY ()
-;		- Set current X/Y location
-;	parm\	AL=X position
-;	parm\	AH=Y position
-;**************************************************;
-
-GotoXY:
-	pusha
-	mov	[_CurX], al		; just set the current position
-	mov	[_CurY], ah
-	popa
-	ret
-
-message db "just a noice test", 0
-
-proj_e_init_vid_mem:
-    mov ax,0x13
+    mov ah, 0x02  ; linked with int 0x10 : move cursor
+    xor bh, bh    ; page number
     int 0x10
 
-    call ClrScr32
-    mov ebx, message
-    call Puts32
+    ret
+
+; avoid this, just testing some stuff
+proj_e_init_vid_mem16:
+    mov ax, VIDMEM
+    mov es, ax     ; Set video segment to VIDMEM
+    mov ax, 0x4020 ; colour + space character(0x20)
+    mov cx, 2000   ; Number of cells to update 80*25=2000
+    xor di, di     ; Video offset starts at 0 (upper left of screen)
+    rep stosw      ; Store AX to CX # of words starting at ES:[DI]
+
     ret
 
 %endif
+
+
+
+
+

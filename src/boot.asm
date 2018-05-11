@@ -13,7 +13,7 @@ data:
     msg_kernel_load_err db '[!] [Bootloader] Could not load kernel', 13, 10, 0
     ; parameters
     KERNEL_BLOCK_START equ      1
-    KERNEL_BLOCKS_SIZE equ      4
+    KERNEL_BLOCKS_SIZE equ     32  ; 32*512=16384B=16kB
     KERNEL_SEGMENT     equ 0x1000
 
 main:

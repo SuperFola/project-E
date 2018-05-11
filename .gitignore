@@ -2,5 +2,7 @@ build/
 cdiso/
 bin/
 obj/
+iso/
 *.o
 *.swp
+*.bin

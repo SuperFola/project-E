@@ -2,11 +2,15 @@
 
 if [ "$#" -eq "1" ] &&  [ "$1" == "qemu" ]; then
     echo Running qemu
-    qemu-system-x86_64 -fda build/project_e.img
+    qemu-system-i386 -fda build/project_e.img
     exit 0
 else
     echo Building ISO
     if [ ! -d "iso" ]; then
+        mkdir iso
+    else
+        # clean working directory
+        rm -rf iso/
         mkdir iso
     fi
 
@@ -14,7 +18,9 @@ else
     dd if=build/project_e.img of=iso/floppy.img seek=0 bs=512 count=33 conv=notrunc  # we are copying 33 sectors (33*512B)
 
     cd iso
-    genisoimage -quiet -V "Project-E" -input-charset iso8859-1 -o project_e.iso -b floppy.img -hide floppy.img ./
+    genisoimage -quiet -V "Project-E" -input-charset iso8859-1 -c boot.cat -l -R -J \
+                -boot-info-table -no-emul-boot -boot-load-size 4 \
+                -o project_e.iso -b floppy.img -hide floppy.img ./
     exit 0
 fi
 

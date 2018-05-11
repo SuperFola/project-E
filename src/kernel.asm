@@ -10,6 +10,8 @@ data:
     msg_ker  db 'Kernel loaded',  13, 10, 0
     msg_info db 'Project E is developped by SuperFola', 13, 10, 0
     ret_line db 13, 10, 0
+    msg_app_load_ok  db '[Kernel] App loaded', 13, 10, 0
+    msg_app_load_err db '[!] [Kernel] Could not load app', 13, 10, 0
 
     buffer times 72 db 0
     flag_gdt_installed db 0
@@ -23,6 +25,10 @@ data:
 
     shell_error_wrong_command db 'Unknown command', 13, 10, 0
 
+    APP_BLOCK_START equ      5
+    APP_BLOCKS_SIZE equ      2  ; 2*512B=1024B
+    APP_SEGMENT     equ 0x1800
+
 main:
     mov ax, cs
     mov ds, ax
@@ -30,9 +36,6 @@ main:
     ; kernel was loaded successfully !
     mov si, msg_ker
     call proj_e_print16
-    
-    ;call proj_e_init_vid_mem16
-    ;jmp $
 
 shell_begin:
     mov si, ret_line
@@ -91,6 +94,31 @@ shell_begin:
     call proj_e_clear_screen16
     mov cx, 0x0000
     call proj_e_move_cursor16
+    
+    
+    ; prepare to load app
+    mov ah, 2                        ; sectors to read
+    mov al, APP_BLOCKS_SIZE          ; number of blocks to read
+    push word APP_SEGMENT            ; where it will be loaded
+    pop es
+    xor bx, bx                       ; reset bx to 0
+    mov cx, APP_BLOCK_START + 1      ; sector count start from 1
+    mov dx, 0
+    int 0x13                         ; call interrupt
+                                     ; Writes error to Carry flag
+    jnc .jump_to_app                 ; loading success, no error in carry flag
+
+.app_loading_error:
+    mov si, msg_app_load_err
+    call proj_e_print16
+    jmp $
+
+.jump_to_app:
+    mov si, msg_app_load_ok
+    call proj_e_print16
+    jmp APP_SEGMENT:0
+    
+    
     jmp shell_begin
 
 ; command reboot (shell_command_rbt) selected
@@ -99,4 +127,4 @@ shell_begin:
     call proj_e_reboot16
 
 
-times 16384-($-$$) db 0
+; times 16384-($-$$) db 0

@@ -1,42 +1,7 @@
-%ifndef stdio_h_1337
-%define stdio_h_1337
-
-%macro mystosb16_di 0
-    mov [di], al
-    inc di
-%endmacro
+%ifndef string_asm
+%define string_asm
 
 bits 16
-
-; Routine for outputting a string on the screen
-; INPUT  : SI (containing address of the string)
-; OUTPUT : none
-proj_e_print16:
-    mov ah, 0x0e     ; specify int 0x10 (teletype output)
-.printchar:
-    lodsb            ; load byte from si into al, increment si
-    cmp al, 0        ; is it the end of the string ?
-    je .done         ; yes => quit ; no => continue
-    int 0x10         ; print the character
-    jmp .printchar
-.done:
-    ret
-
-; Routine to reboot the machine
-; INPUT  : none
-; OUTPUT : none
-proj_e_reboot16:
-    db 0x0ea         ; sending us to the end of the memory, to reboot
-    dw 0x0000
-    dw 0xffff
-
-; Routine to wait for any key press
-; INPUT  : none
-; OUTPUT : none
-proj_e_waitkeypress16:
-    mov ah, 0
-    int 0x16         ; BIOS keyboard service
-    ret
 
 ; Routine to get a string from the user
 ; Waits for a complete string of user input and puts it in buffer
@@ -148,27 +113,6 @@ proj_e_compare_string16:
     jmp .done
 
 .done:
-    ret
-
-bits 32
-
-VIDEO_MEMORY   equ 0xb8000
-WHITE_ON_BLACK equ 0x0f
-
-proj_e_print32:
-    pusha
-    mov edx, VIDEO_MEMORY
-.loop:
-    mov al, [ebx]
-    mov ah, WHITE_ON_BLACK
-    cmp al, 0
-    je .done
-    mov [edx], ax
-    add ebx, 1
-    add edx, 2
-    jmp .loop
-.done:
-    popa
     ret
 
 %endif

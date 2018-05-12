@@ -2,7 +2,7 @@
 
 if [ "$#" -eq "1" ] &&  [ "$1" == "qemu" ]; then
     echo Running qemu
-    qemu-system-i386 -fda build/project_e.img
+    qemu-system-i386 -fda build/project_e.img -d int,pcall,cpu_reset,guest_errors -no-reboot -no-shutdown
     exit 0
 else
     echo Building ISO

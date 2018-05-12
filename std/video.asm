@@ -1,5 +1,7 @@
-%ifndef video_h_1337
-%define video_h_1337
+%ifndef video_asm
+%define video_asm
+
+bits 16
 
 %define VIDMEM  0xb800   ; video memory
 %define COLS        80   ; width and height of screen
@@ -23,8 +25,6 @@
 %define CHAR_ATTR_WHITE   15
 
 %define CREATE_COLOUR(fg, bg) ((fg) + (bg) * 16)
-
-%define CA_WHITE_ON_BLUE 0x3f
 
 ; Routine to clear the screen
 ; INPUT  : AH (color to use to clear the screen)

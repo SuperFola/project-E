@@ -3,11 +3,12 @@ bits 16
 start:
     jmp main
 
-%include "std/stdio.inc"
-%include "std/video.inc"
+%include "std/stdio.asm"
+%include "std/string.asm"
+%include "std/video.asm"
 
 data:
-    msg_ker  db 'Kernel loaded',  13, 10, 0
+    msg_ker  db '[Kernel] Loaded',  13, 10, 0
     msg_info db 'Project E is developped by SuperFola', 13, 10, 0
     ret_line db 13, 10, 0
     msg_app_load_ok  db '[Kernel] App loaded', 13, 10, 0
@@ -26,8 +27,8 @@ data:
     shell_error_wrong_command db 'Unknown command', 13, 10, 0
 
     APP_BLOCK_START equ      5
-    APP_BLOCKS_SIZE equ      2  ; 2*512B=1024B
-    APP_SEGMENT     equ 0x1800
+    APP_BLOCKS_SIZE equ      8  ; 8*512B=4096B
+    APP_SEGMENT     equ 0x7e00
 
 main:
     mov ax, cs
@@ -40,7 +41,7 @@ main:
 shell_begin:
     mov si, ret_line
     call proj_e_print16
-    mov si, shell_cursor       ; print cursor
+    mov si, shell_cursor          ; print cursor
     call proj_e_print16
 
     ; ask for user input
@@ -92,10 +93,9 @@ shell_begin:
 .command_test:
     mov ah, CREATE_COLOUR(CHAR_ATTR_CYAN, CHAR_ATTR_RED)  ; cyan on red background
     call proj_e_clear_screen16
-    mov cx, 0x0000
+    mov cx, 0x0000                 ; set cursor position : x=0,y=0
     call proj_e_move_cursor16
-    
-    
+
     ; prepare to load app
     mov ah, 2                        ; sectors to read
     mov al, APP_BLOCKS_SIZE          ; number of blocks to read
@@ -111,14 +111,13 @@ shell_begin:
 .app_loading_error:
     mov si, msg_app_load_err
     call proj_e_print16
-    jmp $
+    jmp shell_begin
 
 .jump_to_app:
     mov si, msg_app_load_ok
     call proj_e_print16
-    jmp APP_SEGMENT:0
-    
-    
+    jmp APP_SEGMENT
+    ; jump back when exiting app
     jmp shell_begin
 
 ; command reboot (shell_command_rbt) selected
@@ -126,5 +125,5 @@ shell_begin:
 .command_rbt:
     call proj_e_reboot16
 
-
-; times 16384-($-$$) db 0
+; 16kB kernel
+times 16384-($-$$) db 0

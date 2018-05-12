@@ -1,24 +1,25 @@
 bits 16
-org 0
+org 0x7c00
 
 start:
     jmp main
 
-%include "std/stdio.inc"
+%include "std/stdio.asm"
 
 data:
     ; strings
     new_line db 13, 10, 0
-    message  db 'Project E', 13, 10, '=========', 13, 10, 13, 10, '[Bootloader] Press any key to load the kernel', 0
-    msg_kernel_load_err db '[!] [Bootloader] Could not load kernel', 13, 10, 0
+    title    db 'Project E', 13, 10, '=========', 13, 10, 13, 10, 0
+    message  db '[Bootloader] Press any key to load bootloader', 0
+    msg_kernel_load_err db '[!] [Bootloader] Could not load bootloader', 13, 10, 0
     ; parameters
-    KERNEL_BLOCK_START equ      1
-    KERNEL_BLOCKS_SIZE equ     32  ; 32*512=16384B=16kB
-    KERNEL_SEGMENT     equ 0x1000
+    KERNEL_BLOCK_START equ     1
+    KERNEL_BLOCKS_SIZE equ    32  ; 32*512B=16384B
+    KERNEL_SEGMENT     equ 0x500
 
 main:
-    cli              ; move registers for offset of BIOS 0x7c0 load point
-    mov ax, 0x7c0    ; offset
+    cli
+    xor ax, ax
     mov ds, ax
     mov es, ax
 
@@ -28,6 +29,8 @@ main:
     sti
 
     ; display message on startup
+    mov si, title
+    call proj_e_print16
     mov si, message
     call proj_e_print16
     call proj_e_waitkeypress16
@@ -42,14 +45,15 @@ main:
     xor bx, bx                       ; reset bx to 0
     mov cx, KERNEL_BLOCK_START + 1   ; sector count start from 1
     mov dx, 0
-    int 13h                          ; call interrupt
+    int 0x13                         ; call interrupt
                                      ; Writes error to Carry flag
-    jnc .jump_to_kernel   ; loading success, no error in carry flag
+    jnc .jump_to_kernel              ; loading success, no error in carry flag
 
 .kernel_loading_error:
     mov si, msg_kernel_load_err
     call proj_e_print16
-    jmp $
+    cli
+    hlt
 
 .jump_to_kernel:
     jmp KERNEL_SEGMENT:0

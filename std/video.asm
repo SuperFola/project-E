@@ -26,6 +26,11 @@ bits 16
 
 %define CREATE_COLOUR(fg, bg) ((fg) + (bg) * 16)
 
+%macro move_cursor 1
+    mov cx, %1
+    call proj_e_move_cursor16
+%endmacro
+
 ; Routine to clear the screen
 ; INPUT  : AH (color to use to clear the screen)
 ; OUTPUT : none

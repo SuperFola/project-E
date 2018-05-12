@@ -3,6 +3,18 @@
 
 bits 16
 
+%macro input 2
+    mov di, %1
+    mov ch, %2
+    call proj_e_get_user_input16
+%endmacro
+
+%macro strcmp 2
+    mov di, %1
+    mov si, %2
+    call proj_e_compare_string16
+%endmacro
+
 ; Routine to get a string from the user
 ; Waits for a complete string of user input and puts it in buffer
 ; Sensitive for backspace and Enter buttons

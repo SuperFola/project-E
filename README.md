@@ -16,6 +16,7 @@ It was developped and tested under Lubuntu 18.04, on a x86_64 machine.
 
 ```bash
 ~$ cd project-E-master
+~/project-E-master$ make && ./runs.sh  # make the binary image and build the ISO
 ~/project-E-master$ sudo fdisk -l
 # ...
 # find the USB you want to burn the ISO to
@@ -30,6 +31,10 @@ It was developped and tested under Lubuntu 18.04, on a x86_64 machine.
 ~/project-E-master$ sudo qemu-system-i386 -cdrom /dev/sdX # testing the installation
 
 ```
+
+## Making your own application to use in Project E
+
+We have a nice application template under src/app.asm.
 
 ## Bug report
 

@@ -2,7 +2,7 @@
 
 if [ "$#" -eq "1" ] &&  [ "$1" == "qemu" ]; then
     echo Running qemu
-    qemu-system-i386 -fda build/project_e.img -d int,pcall,cpu_reset,guest_errors -no-reboot -no-shutdown
+    qemu-system-i386 -fda build/project_e.img
     exit 0
 else
     echo Building ISO
@@ -15,7 +15,10 @@ else
     fi
 
     dd if=/dev/zero of=iso/floppy.img bs=512 count=2880  # creating a 512*2880 disk (size of a 1.44MB floppy)
-    dd if=build/project_e.img of=iso/floppy.img seek=0 bs=512 count=33 conv=notrunc  # we are copying 33 sectors (33*512B)
+    dd if=build/project_e.img of=iso/floppy.img seek=0 bs=512 count=87 conv=notrunc  # we are copying 87 sectors
+    # 1 for the Bootloader
+    # 32 for the Kernel
+    # 64 for the 8 apps
 
     cd iso
     genisoimage -quiet -V "Project-E" -input-charset iso8859-1 -c boot.cat -l -R -J \

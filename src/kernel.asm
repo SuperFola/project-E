@@ -1,4 +1,5 @@
 bits 16
+org 0
 
 start:
     jmp main
@@ -6,6 +7,7 @@ start:
 %include "std/stdio.asm"
 %include "std/string.asm"
 %include "std/video.asm"
+%include "std/filesystem.asm"
 
 data:
     msg_ker  db '[Kernel] Loaded',  13, 10, 0
@@ -28,26 +30,21 @@ data:
 
     APP_BLOCK_START equ      5
     APP_BLOCKS_SIZE equ      8  ; 8*512B=4096B
-    APP_SEGMENT     equ 0x7e00
+    APP_SEGMENT     equ 0x07e0  ; 0x07e0:0x0000=0x8000
 
 main:
     mov ax, cs
     mov ds, ax
 
     ; kernel was loaded successfully !
-    mov si, msg_ker
-    call proj_e_print16
+    print msg_ker
 
 shell_begin:
-    mov si, ret_line
-    call proj_e_print16
-    mov si, shell_cursor          ; print cursor
-    call proj_e_print16
+    print ret_line
+    print shell_cursor            ; print cursor
 
     ; ask for user input
-    mov di, buffer                ; move buffer to destination output
-    mov ch, 72                    ; character limit
-    call proj_e_get_user_input16  ; wait for user input
+    input buffer, 72
 
     ; to be able to do the comparisons tests
     mov si, buffer
@@ -73,51 +70,12 @@ shell_begin:
 
 ; wrong user input (command not recognized)
 .wrong_input_error:
-    mov si, shell_error_wrong_command
-    call proj_e_print16
+    print shell_error_wrong_command
     jmp shell_begin
 
 ; command help (shell_command_help) selected
 .command_help:
-    mov si, shell_action_help
-    call proj_e_print16
-    jmp shell_begin
-
-; command info (shell_command_info) selected
-.command_info:
-    mov si, msg_info
-    call proj_e_print16
-    jmp shell_begin
-
-; command command_test
-.command_test:
-    mov ah, CREATE_COLOUR(CHAR_ATTR_CYAN, CHAR_ATTR_RED)  ; cyan on red background
-    call proj_e_clear_screen16
-    mov cx, 0x0000                 ; set cursor position : x=0,y=0
-    call proj_e_move_cursor16
-
-    ; prepare to load app
-    mov ah, 2                        ; sectors to read
-    mov al, APP_BLOCKS_SIZE          ; number of blocks to read
-    push word APP_SEGMENT            ; where it will be loaded
-    pop es
-    xor bx, bx                       ; reset bx to 0
-    mov cx, APP_BLOCK_START + 1      ; sector count start from 1
-    mov dx, 0
-    int 0x13                         ; call interrupt
-                                     ; Writes error to Carry flag
-    jnc .jump_to_app                 ; loading success, no error in carry flag
-
-.app_loading_error:
-    mov si, msg_app_load_err
-    call proj_e_print16
-    jmp shell_begin
-
-.jump_to_app:
-    mov si, msg_app_load_ok
-    call proj_e_print16
-    jmp APP_SEGMENT
-    ; jump back when exiting app
+    print shell_action_help
     jmp shell_begin
 
 ; command reboot (shell_command_rbt) selected
@@ -125,5 +83,38 @@ shell_begin:
 .command_rbt:
     call proj_e_reboot16
 
+; command info (shell_command_info) selected
+.command_info:
+    print msg_info
+    jmp shell_begin
+
+; command command_test
+.command_test:
+    mov ah, CREATE_COLOUR(CHAR_ATTR_CYAN, CHAR_ATTR_RED)  ; cyan on red background
+    call proj_e_clear_screen16
+    ; move cursor in x=0,y=0
+    move_cursor 0x0000
+
+    ; prepare to load app
+    load_file APP_BLOCKS_SIZE, APP_SEGMENT, APP_BLOCK_START
+    jnc .jump_to_app                 ; loading success, no error in carry flag
+
+.app_loading_error:
+    print msg_app_load_err
+    jmp shell_begin
+
+.jump_to_app:
+    print msg_app_load_ok
+
+    ; to be able to reload it later
+    ; ???
+
+    jmp APP_SEGMENT:0x0000
+    ; ensure DS is set correctly
+    mov ax, cs
+    mov ds, ax
+    ; jump back when exiting app
+    jmp shell_begin
+
 ; 16kB kernel
-times 16384-($-$$) db 0
+;times 16384-($-$$) db 0

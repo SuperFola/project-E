@@ -9,7 +9,7 @@ bits 16
 %endmacro
 
 %macro print 1
-    mov si, $1
+    mov si, %1
     call proj_e_print16
 %endmacro
 

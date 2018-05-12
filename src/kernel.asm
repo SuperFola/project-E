@@ -10,7 +10,6 @@ start:
 %include "std/filesystem.asm"
 
 data:
-    msg_ker  db '[Kernel] Loaded',  13, 10, 0
     msg_info db 'Project E is developped by SuperFola', 13, 10, 0
     ret_line db 13, 10, 0
     msg_app_load_ok  db '[Kernel] App loaded', 13, 10, 0
@@ -35,9 +34,6 @@ data:
 main:
     mov ax, cs
     mov ds, ax
-
-    ; kernel was loaded successfully !
-    print msg_ker
 
 shell_begin:
     print ret_line
@@ -105,16 +101,7 @@ shell_begin:
 
 .jump_to_app:
     print msg_app_load_ok
-
-    ; to be able to reload it later
-    ; ???
-
     jmp APP_SEGMENT:0x0000
-    ; ensure DS is set correctly
-    mov ax, cs
-    mov ds, ax
-    ; jump back when exiting app
-    jmp shell_begin
 
 ; 16kB kernel
 ;times 16384-($-$$) db 0

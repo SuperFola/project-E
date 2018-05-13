@@ -27,7 +27,7 @@ data:
 
     shell_error_wrong_command db 'Unknown command', 13, 10, 0
 
-    APP_BLOCK_START equ      5
+    APP_BLOCK_START equ     33
     APP_BLOCKS_SIZE equ      8  ; 8*512B=4096B
     APP_SEGMENT     equ 0x07e0  ; 0x07e0:0x0000=0x8000
 
@@ -92,7 +92,7 @@ shell_begin:
     move_cursor 0x0000
 
     ; prepare to load app
-    load_file APP_BLOCKS_SIZE, APP_SEGMENT, APP_BLOCK_START
+    load_file APP_BLOCK_START, APP_SEGMENT, APP_BLOCKS_SIZE
     jnc .jump_to_app                 ; loading success, no error in carry flag
 
 .app_loading_error:
@@ -104,4 +104,4 @@ shell_begin:
     jmp APP_SEGMENT:0x0000
 
 ; 16kB kernel
-;times 16384-($-$$) db 0
+times 16384-($-$$) db 0

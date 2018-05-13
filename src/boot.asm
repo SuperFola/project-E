@@ -40,7 +40,7 @@ main:
     print new_line
 
     ; prepare to load the kernel
-    load_file KERNEL_BLOCKS_SIZE, KERNEL_SEGMENT, KERNEL_BLOCK_START
+    load_file KERNEL_BLOCK_START, KERNEL_SEGMENT, KERNEL_BLOCKS_SIZE
     jnc .jump_to_kernel              ; loading success, no error in carry flag
 
 .kernel_loading_error:

@@ -9,16 +9,14 @@ start:
 
 data:
     ; strings
-    new_line db 13, 10, 0
-    title    db 'Project E', 13, 10, '=========', 13, 10, 13, 10, 0
-    message  db '[Bootloader] Press any key to load kernel', 0
+    title               db 'Project E', 13, 10, '=========', 13, 10, 13, 10, 0
+    message             db '[Bootloader] Press any key to load kernel', 0
     msg_kernel_loaded   db '[Bootloader] Kernel loaded', 13, 10, 0
     msg_kernel_load_err db '[!] [Bootloader] Could not load kernel', 13, 10, 0
-
     ; parameters
     KERNEL_BLOCK_START equ      1
-    KERNEL_BLOCKS_SIZE equ     32  ; 32*512B=16384B
-    KERNEL_SEGMENT     equ 0x0100  ; 0x0100:0x0000=0x1000
+    KERNEL_BLOCKS_SIZE equ     32
+    KERNEL_SEGMENT     equ 0x0100    ; 0x0100:0x0000=0x1000
 
 main:
     cli
@@ -35,11 +33,12 @@ main:
     print title
     print message
     call proj_e_waitkeypress
-    print new_line
+    print nl
 
-    ; prepare to load the kernel
+    ; loading kernel
     load_file KERNEL_BLOCK_START, KERNEL_SEGMENT, KERNEL_BLOCKS_SIZE
-    jnc .jump_to_kernel              ; loading success, no error in carry flag
+
+    jnc .jump_to_kernel
 
 .kernel_loading_error:
     print msg_kernel_load_err

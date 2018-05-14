@@ -6,3 +6,5 @@ iso/
 *.o
 *.swp
 *.bin
+# because it's still not ready :
+stage2.asm

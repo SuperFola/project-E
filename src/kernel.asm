@@ -109,6 +109,20 @@ shell_begin:
 
 ; command dump (shell_command_dump) selected
 .command_dump:
+    mov ax, ds
+    call proj_e_print_hex
+    print nl
+    print nl
+
+    mov ax, es
+    call proj_e_print_hex
+    print nl
+
+    mov ax, bx
+    call proj_e_print_hex
+    print nl
+    print nl
+
     printhex proj_e_print
     print nl
 

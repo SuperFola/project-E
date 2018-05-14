@@ -1,0 +1,7 @@
+display_library: sdl
+megs: 128
+clock: sync=realtime, time0=local
+floppya: 1_44=./build/project_e.img, status=inserted
+boot: floppy
+mouse: enabled=0
+magic_break: enabled=1

@@ -6,10 +6,13 @@ start:
     jmp main
 
 ; all the includes we must do will be right there
-%include "std/stdio.asm"   ; needed for print()
-%include "std/video.asm"   ; needed to change the colors of the screen, clear it,
-                           ; and move the cursor
-%include "std/string.asm"  ; needed for input() and strcmp()
+%include "std/macros.asm"
+%include "std/defines.asm"
+; needed for print(), to change the colors of the screen, clear it,
+; and move the cursor, input() and strcmp()
+;%include "std/string.asm"
+;%include "std/stdio.asm"
+;%include "std/video.asm"
 
 ; our variables will be right there
 data:

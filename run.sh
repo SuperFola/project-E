@@ -3,11 +3,11 @@
 if [ "$#" -ge "1" ] &&  [ "$1" == "qemu" ]; then
     echo Running qemu
     debug_options="-d int,cpu_reset,guest_errors -no-reboot -no-shutdown"
-    command="qemu-system-i386 -drive format=raw,if=floppy,index=0,file=build/project_e.img "
+    command="qemu-system-i386 -drive format=raw,if=floppy,index=0,file=build/project_e.img -m 128 "
     if [ "$#" -eq "2" ] && [ "$2" == "debug" ]; then
         command=$command$debug_options
     fi
-    $command && exit 0
+    $command || exit 0
 else
     echo Building ISO
     if [ ! -d "iso" ]; then

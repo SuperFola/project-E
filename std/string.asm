@@ -1,19 +1,7 @@
-%ifndef string_asm
-%define string_asm
+%ifndef proj_e_string_asm
+%define proj_e_string_asm
 
 bits 16
-
-%macro input 2
-    mov di, %1
-    mov ch, %2
-    call proj_e_get_user_input
-%endmacro
-
-%macro strcmp 2
-    mov di, %1
-    mov si, %2
-    call proj_e_compare_string
-%endmacro
 
 ; Routine to get a string from the user
 ; Waits for a complete string of user input and puts it in buffer
@@ -100,30 +88,28 @@ proj_e_get_user_input:
 ; OUTPUT : carry flag on if strings are equal
 ; N.B.   : strings in SI and DI remain untouched
 proj_e_compare_string:
-  .compare_next_character:      ; a loop that goes character by character
+.compare_next_character:
+    ; a loop that goes character by character
     mov al, [si]      ; focus on next byte in si
     mov bl, [di]      ; focus on next byte in di
     cmp al, bl
     jne .conclude_not_equal       ; if not equal, conclude and exit
 
     ; we know: two bytes are equal
-
-    cmp al, 0         ; did we just compare two zeros?
-    je .conclude_equal         ; if yes, we've reached the end of the strings. They are equal.
+    cmp al, 0             ; did we just compare two zeros?
+    je .conclude_equal    ; if yes, we've reached the end of the strings. They are equal.
 
     ; increment counters for next loop
     inc di
     inc si
     call .compare_next_character
-
 .conclude_equal:
-    stc              ; sets the carry flag (meaning that they ARE equal)
+    ; sets the carry flag (meaning that they ARE equal)
+    stc
     jmp .done
-
 .conclude_not_equal:
-    clc              ; clears the carry flag (meaning that they ARE NOT equal)
-    jmp .done
-
+    ; clears the carry flag (meaning that they ARE NOT equal)
+    clc
 .done:
     ret
 

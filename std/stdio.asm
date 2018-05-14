@@ -1,17 +1,11 @@
-%ifndef stdio_asm
-%define stdio_asm
+%ifndef proj_e_stdio_asm
+%define proj_e_stdio_asm
 
 bits 16
 
-%macro mystosb_di 0
-    mov [di], al
-    inc di
-%endmacro
+%include "std/macros.asm"
 
-%macro print 1
-    mov si, %1
-    call proj_e_print
-%endmacro
+nl db 13, 10, 0
 
 ; Routine for outputting a string on the screen
 ; INPUT  : SI (containing address of the string)

@@ -1,35 +1,9 @@
-%ifndef video_asm
-%define video_asm
+%ifndef proj_e_video_asm
+%define proj_e_video_asm
 
 bits 16
 
-%define VIDMEM  0xb800   ; video memory
-%define COLS        80   ; width and height of screen
-%define LINES       25
-
-%define CHAR_ATTR_BLACK    0
-%define CHAR_ATTR_BLUE     1
-%define CHAR_ATTR_GREEN    2
-%define CHAR_ATTR_CYAN     3
-%define CHAR_ATTR_RED      4
-%define CHAR_ATTR_MAGENT   5
-%define CHAR_ATTR_BROWN    6
-%define CHAR_ATTR_LGREY    7
-%define CHAR_ATTR_DGREY    8
-%define CHAR_ATTR_LBLUE    9
-%define CHAR_ATTR_LGREEN  10
-%define CHAR_ATTR_LCYAN   11
-%define CHAR_ATTR_LRED    12
-%define CHAR_ATTR_LMAGENT 13
-%define CHAR_ATTR_YELLOW  14
-%define CHAR_ATTR_WHITE   15
-
-%define CREATE_COLOUR(fg, bg) ((fg) + (bg) * 16)
-
-%macro move_cursor 1
-    mov cx, %1
-    call proj_e_move_cursor
-%endmacro
+%include "std/macros.asm"
 
 ; Routine to clear the screen
 ; INPUT  : AH (color to use to clear the screen)
@@ -69,8 +43,3 @@ proj_e_init_vid_mem:
     ret
 
 %endif
-
-
-
-
-

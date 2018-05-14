@@ -1,5 +1,5 @@
-%ifndef filesystem_asm
-%define filesystem_asm
+%ifndef proj_e_filesystem_asm
+%define proj_e_filesystem_asm
 
 bits 16
 

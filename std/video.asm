@@ -28,13 +28,13 @@ bits 16
 
 %macro move_cursor 1
     mov cx, %1
-    call proj_e_move_cursor16
+    call proj_e_move_cursor
 %endmacro
 
 ; Routine to clear the screen
 ; INPUT  : AH (color to use to clear the screen)
 ; OUTPUT : none
-proj_e_clear_screen16:
+proj_e_clear_screen:
     mov bx, VIDMEM
     mov es, bx
     mov al, ' '
@@ -47,7 +47,7 @@ proj_e_clear_screen16:
 ; Routine to move the cursor on the screen
 ; INPUT  : CH (y position), CL (x position)
 ; OUTPUT : none
-proj_e_move_cursor16:
+proj_e_move_cursor:
     mov dl, cl   ; set position of cursor
     mov dh, ch
 
@@ -58,7 +58,7 @@ proj_e_move_cursor16:
     ret
 
 ; avoid this, just testing some stuff
-proj_e_init_vid_mem16:
+proj_e_init_vid_mem:
     mov ax, VIDMEM
     mov es, ax     ; Set video segment to VIDMEM
     mov ax, 0x4020 ; colour + space character(0x20)

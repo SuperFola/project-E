@@ -6,13 +6,13 @@ bits 16
 %macro input 2
     mov di, %1
     mov ch, %2
-    call proj_e_get_user_input16
+    call proj_e_get_user_input
 %endmacro
 
 %macro strcmp 2
     mov di, %1
     mov si, %2
-    call proj_e_compare_string16
+    call proj_e_compare_string
 %endmacro
 
 ; Routine to get a string from the user
@@ -20,7 +20,7 @@ bits 16
 ; Sensitive for backspace and Enter buttons
 ; INPUT  : DI (buffer address), CH (characters count limit)
 ; OUTPUT : input in buffer
-proj_e_get_user_input16:
+proj_e_get_user_input:
     cld              ; clearing direction flag
     xor cl, cl       ; CL will be our counter to keep track of the number of characters the user has entered.
                      ; XORing cl by itself will set it to zero.
@@ -47,7 +47,7 @@ proj_e_get_user_input16:
     int 0x10       ; Print interrupt
 
     ; puts character in buffer
-    mystosb16_di
+    mystosb_di
 
     inc cl         ; increment counter
     jmp .get_char_and_add_to_buffer    ; recurse
@@ -85,7 +85,7 @@ proj_e_get_user_input16:
 
 .exit_routine:
     mov al, 0       ; end of user input signal
-    mystosb16_di
+    mystosb_di
 
     mov ah, 0x0e
     mov al, 0x0d    ; new line
@@ -99,7 +99,7 @@ proj_e_get_user_input16:
 ; INPUT  : SI (first string address), DI (second string address)
 ; OUTPUT : carry flag on if strings are equal
 ; N.B.   : strings in SI and DI remain untouched
-proj_e_compare_string16:
+proj_e_compare_string:
   .compare_next_character:      ; a loop that goes character by character
     mov al, [si]      ; focus on next byte in si
     mov bl, [di]      ; focus on next byte in di

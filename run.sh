@@ -1,9 +1,13 @@
 #!/bin/bash
 
-if [ "$#" -eq "1" ] &&  [ "$1" == "qemu" ]; then
+if [ "$#" -ge "1" ] &&  [ "$1" == "qemu" ]; then
     echo Running qemu
-    qemu-system-i386 -fda build/project_e.img
-    exit 0
+    debug_options="-d int,cpu_reset,guest_errors -no-reboot -no-shutdown"
+    command="qemu-system-i386 -drive format=raw,if=floppy,index=0,file=build/project_e.img "
+    if [ "$#" -eq "2" ] && [ "$2" == "debug" ]; then
+        command=$command$debug_options
+    fi
+    $command && exit 0
 else
     echo Building ISO
     if [ ! -d "iso" ]; then
@@ -30,4 +34,5 @@ fi
 # if we are here we probably missed a "if"
 echo "No  argument : build the ISO in cdiso/"
 echo "1st argument : qemu   => after having built the floppy, run qemu"
+echo "2nd argument : debug  => to run qemu with debug options"
 exit 1

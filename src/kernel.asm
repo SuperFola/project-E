@@ -47,21 +47,21 @@ shell_begin:
 
     ; checks if user typed help command
     mov di, shell_command_help
-    call proj_e_compare_string16
+    call proj_e_compare_string
     jc .command_help
 
     ; check if user typed reboot command
     mov di, shell_command_rbt
-    call proj_e_compare_string16
+    call proj_e_compare_string
     jc .command_rbt
 
     ; check if user typed info command
     mov di, shell_command_info
-    call proj_e_compare_string16
+    call proj_e_compare_string
     jc .command_info
 
     mov di, shell_command_test
-    call proj_e_compare_string16
+    call proj_e_compare_string
     jc .command_test
 
 ; wrong user input (command not recognized)
@@ -77,7 +77,7 @@ shell_begin:
 ; command reboot (shell_command_rbt) selected
 ; this specific subroutine must be placed at the very end to avoid rebooting for nothing
 .command_rbt:
-    call proj_e_reboot16
+    call proj_e_reboot
 
 ; command info (shell_command_info) selected
 .command_info:
@@ -87,7 +87,7 @@ shell_begin:
 ; command command_test
 .command_test:
     mov ah, CREATE_COLOUR(CHAR_ATTR_CYAN, CHAR_ATTR_RED)  ; cyan on red background
-    call proj_e_clear_screen16
+    call proj_e_clear_screen
     ; move cursor in x=0,y=0
     move_cursor 0x0000
 

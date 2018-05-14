@@ -11,7 +11,6 @@ start:
 
 data:
     msg_info db 'Project E is developped by SuperFola', 13, 10, 0
-    ret_line db 13, 10, 0
     msg_app_load_ok  db '[Kernel] App loaded', 13, 10, 0
     msg_app_load_err db '[!] [Kernel] Could not load app', 13, 10, 0
 
@@ -20,10 +19,11 @@ data:
 
     shell_cursor       db 'kernel> ',     0
     shell_command_help db 'help',   0
-    shell_action_help  db 'help reboot info test', 13, 10, 0
+    shell_action_help  db 'help reboot info test dump', 13, 10, 0
     shell_command_rbt  db 'reboot', 0
     shell_command_info db 'info',   0
     shell_command_test db 'test',   0
+    shell_command_dump db 'dump',   0
 
     shell_error_wrong_command db 'Unknown command', 13, 10, 0
 
@@ -36,7 +36,7 @@ main:
     mov ds, ax
 
 shell_begin:
-    print ret_line
+    print nl
     print shell_cursor            ; print cursor
 
     ; ask for user input
@@ -64,6 +64,10 @@ shell_begin:
     call proj_e_compare_string
     jc .command_test
 
+    mov di, shell_command_dump
+    call proj_e_compare_string
+    jc .command_dump
+
 ; wrong user input (command not recognized)
 .wrong_input_error:
     print shell_error_wrong_command
@@ -84,7 +88,7 @@ shell_begin:
     print msg_info
     jmp shell_begin
 
-; command command_test
+; command test (shell_command_test) selected
 .command_test:
     mov ah, CREATE_COLOUR(CHAR_ATTR_CYAN, CHAR_ATTR_RED)  ; cyan on red background
     call proj_e_clear_screen
@@ -102,6 +106,37 @@ shell_begin:
 .jump_to_app:
     print msg_app_load_ok
     jmp APP_SEGMENT:0x0000
+
+; command dump (shell_command_dump) selected
+.command_dump:
+    printhex proj_e_print
+    print nl
+
+    printhex proj_e_reboot
+    print nl
+
+    printhex proj_e_waitkeypress
+    print nl
+
+    printhex proj_e_print_hex
+    print nl
+
+    printhex proj_e_clear_screen
+    print nl
+
+    printhex proj_e_move_cursor
+    print nl
+
+    printhex proj_e_init_vid_mem
+    print nl
+
+    printhex proj_e_get_user_input
+    print nl
+
+    printhex proj_e_compare_string
+    print nl
+
+    jmp shell_begin
 
 ; 16kB kernel
 times 16384-($-$$) db 0

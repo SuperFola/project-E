@@ -11,15 +11,15 @@ build:
 	@mkdir build
 
 bootloader:
-	@nasm -f bin -o build/boot.bin src/boot.asm
+	@nasm -O0 -f bin -o build/boot.bin src/boot.asm
 	@echo Bootloader built
 
 kernel:
-	@nasm -f bin -o build/kernel.bin src/kernel.asm
+	@nasm -O0 -f bin -o build/kernel.bin src/kernel.asm
 	@echo Kernel built
 
 app:
-	@nasm -f bin -o build/app.bin src/app.asm
+	@nasm -O0 -f bin -o build/app.bin src/app.asm
 	@echo App built
 
 clean:

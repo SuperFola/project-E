@@ -100,8 +100,8 @@ proj_e_compare_string:
     je .conclude_equal    ; if yes, we've reached the end of the strings. They are equal.
 
     ; increment counters for next loop
-    inc di
     inc si
+    inc di
     call .compare_next_character
 .conclude_equal:
     ; sets the carry flag (meaning that they ARE equal)

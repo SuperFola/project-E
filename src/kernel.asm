@@ -15,7 +15,6 @@ data:
     msg_app_load_err db '[!] [Kernel] Could not load app', 13, 10, 0
 
     buffer times 72 db 0
-    flag_gdt_installed db 0
 
     shell_cursor       db 'kernel> ',     0
     shell_command_help db 'help',   0

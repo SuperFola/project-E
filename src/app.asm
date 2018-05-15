@@ -10,9 +10,9 @@ start:
 %include "std/defines.asm"
 ; needed for print(), to change the colors of the screen, clear it,
 ; and move the cursor, input() and strcmp()
-;%include "std/string.asm"
-;%include "std/stdio.asm"
-;%include "std/video.asm"
+%include "std/string.asm"
+%include "std/stdio.asm"
+%include "std/video.asm"
 
 ; our variables will be right there
 data:
@@ -47,7 +47,7 @@ main:
 
 .end:
     ; nothing more to do, we give back the control to the kernel !
-    jmp 0x0100:0x0000
+    jmp KERNEL_LOAD_ADDRESS:0x0000
 
 ; to ensure our application fits in the 4kB
 times 4096-($-$$) db 0

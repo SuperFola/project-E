@@ -102,7 +102,7 @@ proj_e_compare_string:
     ; increment counters for next loop
     inc si
     inc di
-    call .compare_next_character
+    jmp .compare_next_character
 .conclude_equal:
     ; sets the carry flag (meaning that they ARE equal)
     stc

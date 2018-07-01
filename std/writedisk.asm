@@ -1,51 +1,24 @@
-%ifndef proj_e_filesystem_asm
-%define proj_e_filesystem_asm
+%ifndef proj_e_writedisk_asm
+%define proj_e_writedisk_asm
 
 bits 16
 
-; Macro to read file more easily
-; INPUT  : AX (LBA number for sector), BX (linear address, where it will be loaded), CX (sectors count)
+; Macro to write files more easily
+; INPUT  : AX (LBA number for sector), BX (linear address, where the file is loaded), CX (sectors count)
 ; OUTPUT : CF if an error happen while to find it, ES:BX (where it's loaded)
-%macro load_file 3
+%macro write_file 3
     mov ax, %1
     mov bx, %2
     mov cx, %3
-    call proj_e_read_file
+    call proj_e_write_file
 %endmacro
 
-; parameters
-sectors_per_track dw  18
-heads_per_track   dw   2
-bytes_per_sector  dw 512
-drive_number      dw   0
-msg_error_reading_floppy db '[!] Error while reading floppy', 13, 10, 0
-; variables
-abs_sector        dw   0
-abs_head          dw   0
-abs_track         dw   0
-lba_number        dw   0
-destination       dw   0
+%include "std/disk.asm"
 
-; Routine to convert a LBA (Logical Block Addresing) to CHS (Cylinder/Head/Sector)
-; INPUT  : AX (LBA addr), sectors_per_track, heads_per_track
-; OUTPUT : abs_sector (CHS sector addr), abs_head (CHS head addr), abs_track (CHS track addr)
-proj_e_lbachs:
-    xor dx, dx
-    div word [sectors_per_track]
-    inc dl
-    mov byte [abs_sector], dl
-
-    xor dx, dx
-    div word [heads_per_track]
-    mov byte [abs_head], dl
-    mov byte [abs_track], al
-
-    ret
-
-; Routine to read files into memory more easily
-; INPUT  : AX (LBA number for sector), BX (linear address, where it will be loaded), CX (sectors count)
+; Routine to write files into memory more easily
+; INPUT  : AX (LBA number for sector), BX (linear address, where the file is loaded), CX (sectors count)
 ; OUTPUT : CF if an error happen while to find it, ES:BX (where it's loaded)
-proj_e_read_file:
+proj_e_write_file:
 .begin:
     ; save destination
     mov word [destination], bx
@@ -66,8 +39,8 @@ proj_e_read_file:
     ; save counter (for loop)
     push cx
 
-    ; read floppy
-    mov ah, 0x02
+    ; write to floppy
+    mov ah, 0x03
     mov al, 0x01
     mov ch, byte [abs_track]
     mov cl, byte [abs_sector]
@@ -89,7 +62,7 @@ proj_e_read_file:
 
     ; retry
     jnz .loop
-    ; we got an error, impossible to read.
+    ; we got an error, impossible to write.
     jmp .error
 .sectordone:
     ; move forward
@@ -103,7 +76,7 @@ proj_e_read_file:
     ; set carry flag
     stc
     ; optionnal but well it's handy
-    print msg_error_reading_floppy
+    print msg_error_writing_floppy
     ; cleaning up things
     jmp .end
 .quit:

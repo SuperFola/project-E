@@ -5,7 +5,7 @@ start:
     jmp main
 
 %include "std/stdio.asm"
-%include "std/filesystem.asm"
+%include "std/readdisk.asm"
 
 data:
     ; strings

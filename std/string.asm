@@ -185,6 +185,7 @@ proj_e_tokenize_string:
 proj_e_hex_to_int:
     ; '0': 48, '1': 49, '2': 50, '3': 51, '4': 52, '5': 53, '6': 54, '7': 55, '8': 56, '9': 57
     ; 'a': 97, 'b': 98, 'c': 99, 'd': 100, 'e': 101, 'f': 102
+    ; 'A': 65, 'B': 66, 'C': 67, 'D': 68, 'E': 69, 'F': 70
 
     ; get first char
     mov byte al, [si]
@@ -192,14 +193,26 @@ proj_e_hex_to_int:
     cmp al, 48
     jl .error
     cmp al, 57
-    jg .try_letters
+    jg .try_upper_letter
     ; then
     ; convert from ASCII to real number
     sub al, 48
     mov byte [.val], al
     jmp .end
 
-.try_letters:
+.try_upper_letter:
+    ; if 65 <= al <= 70
+    cmp al, 65
+    jl .error
+    cmp al, 70
+    jg .try_lower_letters
+    ; then
+    ; convert from ASCII to real number (+10, 'A' is the reference and 0xA == 10)
+    sub al, 55
+    mov byte [.val], al
+    jmp .end
+
+.try_lower_letters:
     ; if 97 <= al <= 102:
     cmp al, 97
     jl .error

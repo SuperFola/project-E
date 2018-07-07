@@ -30,7 +30,7 @@ data:
              db 's[x] (mem[p] = x)', 13, 10
              db 'i[x] (if mem[p] != 0, code index=x)', 13, 10
              db 'operators: + - / * %', 13, 10
-             db 'x: 2 hex digits (0-9, a-f)', 13, 10
+             db 'x: 2 hex digits [0-9a-fA-F]', 13, 10
              db 0
 
 main:

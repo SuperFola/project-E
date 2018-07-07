@@ -14,6 +14,7 @@ bits 16
 %endmacro
 
 %include "std/disk.asm"
+%include "std/macros.asm"
 
 ; Routine to read files into memory more easily
 ; INPUT  : AX (LBA number for sector), BX (linear address, where it will be loaded), CX (sectors count)

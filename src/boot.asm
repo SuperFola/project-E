@@ -10,8 +10,8 @@ start:
 data:
     ; strings
     title               db 'Project E', 13, 10, '=========', 13, 10, 13, 10, 0
-    message             db '[Bootloader] Press any key to load kernel', 0
-    msg_kernel_loaded   db '[Bootloader] Kernel loaded', 13, 10, 0
+    msg_info            db '[Bootloader] Started in 16 bits (real mode)', 13, 10, 0
+    msg_kernel_loaded   db '[Bootloader] Kernel loaded into RAM @ 0x1000', 13, 10, 0
     msg_kernel_load_err db '[!] [Bootloader] Could not load kernel', 13, 10, 0
     ; parameters
     KERNEL_BLOCK_START equ      1
@@ -31,9 +31,7 @@ main:
 
     ; display message on startup
     print title
-    print message
-    call proj_e_waitkeypress
-    print nl
+    print msg_info
 
     ; loading kernel
     load_file KERNEL_BLOCK_START, KERNEL_SEGMENT, KERNEL_BLOCKS_SIZE

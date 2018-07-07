@@ -6,7 +6,7 @@ bits 16
 ; Routine to get a string from the user
 ; Waits for a complete string of user input and puts it in buffer
 ; Sensitive for backspace and Enter buttons
-; INPUT  : DI (buffer address), CH (characters count limit)
+; INPUT  : DI (buffer address), CH (characters count limit), BL (a value != 0 will print * instead of the character)
 ; OUTPUT : input in buffer
 proj_e_get_user_input:
     cld              ; clearing direction flag
@@ -30,10 +30,23 @@ proj_e_get_user_input:
     je .buffer_overflow
 
     ; User input is normal character
-    ; print input
+    cmp bl, 0
+    je .put_normal_char
+
+    ; save al for later
+    push ax
+    mov al, '*'    ; if bl != 0, then replace the character with a '*'
+    mov ah, 0x0e   ; Teletype mode
+    int 0x10       ; Print interrupt
+    pop ax
+
+    jmp .next
+
+.put_normal_char:
     mov ah, 0x0e   ; Teletype mode
     int 0x10       ; Print interrupt
 
+.next:
     ; puts character in buffer
     mystosb_di
 
@@ -112,5 +125,148 @@ proj_e_compare_string:
     clc
 .done:
     ret
+
+; Routine to get the size of a string
+; INPUT  : SI (string to get size of)
+; OUTPUT : AX (length)
+proj_e_length_string:
+    pusha
+    mov cx, 0
+
+.more:
+    cmp byte [si], 0
+    je .done
+
+    inc si
+    inc cx
+    jmp .more
+
+.done:
+    mov word [.counter], cx
+    popa
+    mov ax, word [.counter]
+    ret
+
+    .counter dw 0
+
+; Routine to tokenize a string "a b c d" (separator is given)
+; INPUT  : SI (string to split), AL (single char separator)
+; OUTPUT : DI (next token or 0 if none)
+proj_e_tokenize_string:
+    push si
+
+.next_char:
+    ; do we have a matching separator ?
+    cmp byte [si], al
+    je .return_token
+    ; is this the end of the string ?
+    cmp byte [si], 0
+    jz .no_more
+
+    ; move forward
+    inc si
+    jmp .next_char
+
+.return_token:
+    mov byte [si], 0
+    inc si
+    mov di, si
+    pop si
+    ret
+
+.no_more:
+    mov di, 0
+    pop si
+    ret
+
+; Routine to convert a single hexdigit string to integer
+; INPUT  : SI (string)
+; OUTPUT : AL (number)
+proj_e_hex_to_int:
+    ; '0': 48, '1': 49, '2': 50, '3': 51, '4': 52, '5': 53, '6': 54, '7': 55, '8': 56, '9': 57
+    ; 'a': 97, 'b': 98, 'c': 99, 'd': 100, 'e': 101, 'f': 102
+
+    ; get first char
+    mov byte al, [si]
+    ; if 48 <= al <= 57:
+    cmp al, 48
+    jl .error
+    cmp al, 57
+    jg .try_letters
+    ; then
+    ; convert from ASCII to real number
+    sub al, 48
+    mov byte [.val], al
+    jmp .end
+
+.try_letters:
+    ; if 97 <= al <= 102:
+    cmp al, 97
+    jl .error
+    cmp al, 102
+    jg .error
+    ; then
+    ; convert from ASCII to real number (+10, 'a' is the reference and 0xa == 10)
+    sub al, 87
+    mov byte [.val], al
+    jmp .end
+
+.end:
+    clc
+    jmp .done
+
+.error:
+    stc
+    print .error_msg
+
+.done:
+    mov byte al, byte [.val]
+    ret
+
+    .val       db 0
+    .error_msg db 'Could not convert hex-digit string to integer', 13, 10, 0
+
+; Routine to convert a 2 hexdigits string to integer
+; INPUT  : SI (string)
+; OUTPUT : AL (number)
+proj_e_2hex_to_int:
+    ; if len(str) != 2:
+    call proj_e_length_string
+    cmp ax, 2
+    ; then
+    ; error
+    jne .error
+    ; else:
+    ; go to end of string
+    add si, ax
+    dec si
+
+    ; convert last digit from the right
+    call proj_e_hex_to_int
+    jc .error
+    mov byte [.val], byte al
+    dec si
+
+    ; convert the 2nd digit and multiply it by 16
+    call proj_e_hex_to_int
+    jc .error
+    mov byte ah, 0x00
+    shl ax, 0x04
+    add byte [.val], byte al
+
+.end:
+    clc
+    jmp .done
+
+.error:
+    stc
+    print .error_msg
+
+.done:
+    mov byte al, byte [.val]
+    ret
+
+    .val       db 0
+    .error_msg db 'Could not convert 2hex-digits string to integer', 13, 10, 0
 
 %endif

@@ -1,0 +1,145 @@
+
+- NASM Map file ---------------------------------------------------------------
+
+Source file:  src/kernel.asm
+Output file:  build/kernel.bin
+
+-- Program origin -------------------------------------------------------------
+
+00000000
+
+-- Sections (summary) ---------------------------------------------------------
+
+Vstart            Start             Stop              Length    Class     Name
+               0                 0              4000  00004000  progbits  .text
+
+-- Sections (detailed) --------------------------------------------------------
+
+---- Section .text ------------------------------------------------------------
+
+class:     progbits
+length:                4000
+start:                    0
+align:     not defined
+follows:   not defined
+vstart:                   0
+valign:    not defined
+vfollows:  not defined
+
+-- Symbols --------------------------------------------------------------------
+
+---- No Section ---------------------------------------------------------------
+
+Value     Name
+00000021  APP_BLOCK_START
+00000008  APP_BLOCKS_SIZE
+000007E0  APP_SEGMENT
+00000029  PLUM_BLOCK_START
+00000020  PLUM_BLOCKS_SIZE
+00000900  PLUM_SEGMENT
+
+
+---- Section .text ------------------------------------------------------------
+
+Real              Virtual           Name
+               0                 0  start
+               3                 3  nl
+               6                 6  proj_e_print
+               8                 8  proj_e_print.printchar
+              12                12  proj_e_print.done
+              13                13  proj_e_reboot
+              18                18  proj_e_waitkeypress
+              1D                1D  proj_e_print_hex
+              26                26  proj_e_print_hex_word
+              36                36  proj_e_print_hex_word.loop
+              4F                4F  proj_e_get_user_input
+              52                52  proj_e_get_user_input.get_char_and_add_to_buffer
+              72                72  proj_e_get_user_input.put_normal_char
+              76                76  proj_e_get_user_input.next
+              7E                7E  proj_e_get_user_input.backspace_pressed
+              9A                9A  proj_e_get_user_input.enter_pressed
+              9D                9D  proj_e_get_user_input.buffer_overflow
+              A0                A0  proj_e_get_user_input.exit_routine
+              B0                B0  proj_e_compare_string
+              B0                B0  proj_e_compare_string.compare_next_character
+              C1                C1  proj_e_compare_string.conclude_equal
+              C5                C5  proj_e_compare_string.conclude_not_equal
+              C6                C6  proj_e_compare_string.done
+              C7                C7  proj_e_length_string
+              CB                CB  proj_e_length_string.more
+              D5                D5  proj_e_length_string.done
+              DE                DE  proj_e_length_string.counter
+              E0                E0  proj_e_tokenize_string
+              E1                E1  proj_e_tokenize_string.next_char
+              EE                EE  proj_e_tokenize_string.return_token
+              F6                F6  proj_e_tokenize_string.no_more
+              FB                FB  proj_e_hex_to_int
+             10D               10D  proj_e_hex_to_int.try_letters
+             11D               11D  proj_e_hex_to_int.end
+             121               121  proj_e_hex_to_int.error
+             128               128  proj_e_hex_to_int.done
+             12C               12C  proj_e_hex_to_int.val
+             12D               12D  proj_e_hex_to_int.error_msg
+             15D               15D  proj_e_2hex_to_int
+             17F               17F  proj_e_2hex_to_int.end
+             183               183  proj_e_2hex_to_int.error
+             18A               18A  proj_e_2hex_to_int.done
+             18E               18E  proj_e_2hex_to_int.val
+             18F               18F  proj_e_2hex_to_int.error_msg
+             1C1               1C1  proj_e_clear_screen
+             1D0               1D0  proj_e_move_cursor
+             1DB               1DB  proj_e_init_vid_mem
+             1EB               1EB  sectors_per_track
+             1ED               1ED  heads_per_track
+             1EF               1EF  bytes_per_sector
+             1F1               1F1  drive_number
+             1F3               1F3  msg_error_reading_floppy
+             214               214  msg_error_writing_floppy
+             238               238  abs_sector
+             23A               23A  abs_head
+             23C               23C  abs_track
+             23E               23E  lba_number
+             240               240  destination
+             242               242  proj_e_lbachs
+             25C               25C  proj_e_read_file
+             25C               25C  proj_e_read_file.begin
+             263               263  proj_e_read_file.main
+             266               266  proj_e_read_file.loop
+             297               297  proj_e_read_file.sectordone
+             2A6               2A6  proj_e_read_file.error
+             2B0               2B0  proj_e_read_file.quit
+             2B1               2B1  proj_e_read_file.end
+             2B2               2B2  data
+             2B2               2B2  msg_info
+             2D9               2D9  msg_app_load_ok
+             301               301  msg_app_load_err
+             323               323  msg_plum_load_ok
+             34C               34C  msg_plum_load_err
+             370               370  buffer
+             3B8               3B8  password
+             3BF               3BF  ask_pass
+             3CA               3CA  wrong_pass
+             3DF               3DF  good_pass
+             3F7               3F7  shell_cursor
+             400               400  shell_command_help
+             405               405  shell_action_help
+             422               422  shell_command_rbt
+             429               429  shell_command_info
+             42E               42E  shell_command_test
+             433               433  shell_command_plum
+             438               438  shell_error_wrong_command
+             44A               44A  main
+             457               457  main.ask
+             48C               48C  main.access_granted
+             492               492  shell_begin
+             4D3               4D3  shell_begin.wrong_input_error
+             4DC               4DC  shell_begin.command_help
+             4E5               4E5  shell_begin.command_rbt
+             4E8               4E8  shell_begin.command_info
+             4F1               4F1  shell_begin.command_test
+             50A               50A  shell_begin.app_loading_error
+             513               513  shell_begin.jump_to_app
+             51E               51E  shell_begin.command_plum
+             537               537  shell_begin.plum_loading_error
+             540               540  shell_begin.jump_to_plum
+

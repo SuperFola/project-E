@@ -23,6 +23,14 @@
 %macro input 2
     mov di, %1
     mov ch, %2
+    mov bl, 0x00
+    call proj_e_get_user_input
+%endmacro
+
+%macro getpass 2
+    mov di, %1
+    mov ch, %2
+    mov bl, 0x01
     call proj_e_get_user_input
 %endmacro
 
@@ -65,19 +73,3 @@
 %endmacro
 
 %endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

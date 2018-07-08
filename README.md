@@ -39,3 +39,13 @@ We have a nice application template under src/app.asm.
 ## Bug report
 
 Feel free to open an issue if you encounter any kind of problem with Project E :smiley:
+
+## Updates
+
+**v0.2.1** Password update: adding a `lock` command to lock the kernel
+
+**v0.2.0** Commands update: adding `echo`, `color`, `clear`, `version`
+
+**v0.1.1** Adding a new program: Plum (small interpreter for an esoteric language)
+
+**v0.1.0** First version: last state was in commit n°42. Took only 5 days to be developped

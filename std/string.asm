@@ -126,6 +126,36 @@ proj_e_compare_string:
 .done:
     ret
 
+; Routine to compare two strings, the second one MUST match the beginning of the first one
+; INPUT  : SI (first string), DI (second string)
+; OUTPUT : carry flag if strings are "equal"
+; N.B.   : strings in SI and DI remain untouched
+proj_e_compare_start_string:
+.compare_next_character:
+    ; a loop that goes character by character
+    mov al, [si]      ; focus on next byte in si
+    mov bl, [di]      ; focus on next byte in di
+
+    cmp bl, 0
+    je .conclude_equal
+
+    cmp al, bl
+    jne .conclude_not_equal
+
+    ; increment counters for next loop
+    inc si
+    inc di
+    jmp .compare_next_character
+.conclude_equal:
+    ; sets the carry flag (meaning that they ARE equal)
+    stc
+    jmp .done
+.conclude_not_equal:
+    ; clears the carry flag (meaning that they ARE NOT equal)
+    clc
+.done:
+    ret
+
 ; Routine to get the size of a string
 ; INPUT  : SI (string to get size of)
 ; OUTPUT : AX (length)

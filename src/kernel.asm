@@ -18,7 +18,7 @@ start:
 %include "std/readdisk.asm"
 
 data:
-    version  db 'v0.2.0', 0
+    version  db 'v0.2.1', 0
     msg_info db 'Project-E is a monolithic kernel working in 16-bits real mode', 13, 10
              db 'developped by SuperFola', 13, 10
              db 0
@@ -36,6 +36,9 @@ data:
     good_pass  db '[Info] Access granted', 13, 10, 0
     pwd_state  db 0
 
+    pwd_lock times 72 db 0
+    ask_lock          db 'Lock? ', 0
+
     cursor        db 'kernel> ', 0
     command_echo  db 'echo',    0
     command_color db 'color',   0
@@ -46,8 +49,9 @@ data:
     command_test  db 'test',    0
     command_plum  db 'plum',    0
     command_ver   db 'version', 0
+    command_lock  db 'lock',    0
     action_help   db 'echo color clear help reboot info test plum', 13, 10
-                  db 'version', 13, 10
+                  db 'version lock', 13, 10
                   db 0
 
     msg_cmd_error db 'Unknown command', 13, 10, 0
@@ -128,6 +132,8 @@ shell_begin:
     check_command command_plum, proj_e_compare_string, .plum
     ; version
     check_command command_ver, proj_e_compare_string, .version
+    ; lock
+    check_command command_lock, proj_e_compare_string, .lock
 
     ; wrong user input (command not recognized)
     ; only print message if there was a command
@@ -269,6 +275,27 @@ shell_begin:
     print version
     print nl
     jmp shell_begin
+
+.lock:
+    ; get password
+    print ask_lock
+    getpass pwd_lock, 72
+
+    ; while (1)
+    .loop_pwd:
+        ; buffer=input("Password? ")
+        print ask_pass
+        input buffer, 72
+        ; if buffer != ask_lock:
+        mov si, buffer
+        mov di, pwd_lock
+        call proj_e_compare_string
+        ; then
+        ; loop again
+        jnc .loop_pwd
+        ; else:
+        ; go to kernel
+        jmp shell_begin
 
 ; 16kB kernel
 times 16384-($-$$) db 0

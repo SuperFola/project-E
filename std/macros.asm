@@ -15,9 +15,9 @@
     call proj_e_print_hex
 %endmacro
 
-%macro mystosb_di 0
-    mov [di], al
-    inc di
+%macro mystosb 1
+    mov [%1], al
+    inc %1
 %endmacro
 
 %macro input 2

@@ -48,7 +48,7 @@ proj_e_get_user_input:
 
 .next:
     ; puts character in buffer
-    mystosb_di
+    mystosb di
 
     inc cl         ; increment counter
     jmp .get_char_and_add_to_buffer    ; recurse
@@ -86,7 +86,7 @@ proj_e_get_user_input:
 
 .exit_routine:
     mov al, 0       ; end of user input signal
-    mystosb_di
+    mystosb di
 
     mov ah, 0x0e
     mov al, 0x0d    ; new line

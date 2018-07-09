@@ -29,7 +29,6 @@ It was developped and tested under Lubuntu 18.04, on a x86_64 machine.
 ~/project-E-master$ ./deploy.sh /dev/sdX  # here my disk is /dev/sdX
                                           # replace by yours before executing the command
 ~/project-E-master$ sudo qemu-system-i386 -cdrom /dev/sdX # testing the installation
-
 ```
 
 ## Making your own application to use in Project E

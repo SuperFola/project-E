@@ -8,7 +8,7 @@ A Plum program can use a maximum of 255 characters, as well as a stack of 256 by
 
 ## Specification
 
-`!` print the current memory until it finds a null character. Then, go back to the first char which was printed.
+`!` print the current memory until it finds a null character
 
 `?` ask the user for an input. Maximum of 256 characters.
 
@@ -25,6 +25,8 @@ A Plum program can use a maximum of 255 characters, as well as a stack of 256 by
 `S[...]` store all the following characters as bytes in memory, until it finds a `$`.
 
 `i[x]` if memory[ptr] != 0, set the code pointer to `x`.
+
+`P` prints the current memory pointer.
 
 `x` is a 2 hex digits number : `[0-9a-fA-F]{2}'`
 

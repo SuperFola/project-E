@@ -9,3 +9,5 @@ iso/
 kernel.map
 # still not ready
 src/stage2.asm
+script.gdb
+syslinux.cfg

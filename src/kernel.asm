@@ -18,7 +18,7 @@ start:
 %include "std/readdisk.asm"
 
 data:
-    version  db 'v0.2.1', 0
+    version  db 'v0.2.2', 0
     msg_info db 'Project-E is a monolithic kernel working in 16-bits real mode', 13, 10
              db 'developped by SuperFola', 13, 10
              db 0
@@ -26,7 +26,7 @@ data:
     msg_app_load_err  db '[!] [Kernel] Could not load app', 13, 10, 0
     msg_plum_load_ok  db '[Kernel] Plum loaded into RAM @ 0x9000', 13, 10, 0
     msg_plum_load_err db '[!] [Kernel] Could not load plum', 13, 10, 0
-    msg_error_color   db '[!] [Color] Wrong argument', 13, 10, 0
+    msg_error_clear   db '[!] [Clear] Wrong argument', 13, 10, 0
 
     buffer times 72 db 0
     password        db 115, 99, 105, 112, 105, 111, 0
@@ -41,7 +41,6 @@ data:
 
     cursor        db 'kernel> ', 0
     command_echo  db 'echo',    0
-    command_color db 'color',   0
     command_clear db 'clear',   0
     command_help  db 'help',    0
     command_rbt   db 'reboot',  0
@@ -50,7 +49,7 @@ data:
     command_plum  db 'plum',    0
     command_ver   db 'version', 0
     command_lock  db 'lock',    0
-    action_help   db 'echo color clear help reboot info test plum', 13, 10
+    action_help   db 'echo clear help reboot info test plum', 13, 10
                   db 'version lock', 13, 10
                   db 0
 
@@ -65,14 +64,19 @@ data:
     PLUM_SEGMENT     equ 0x0900 ; 0x0900:0x0000=0x9000
 
 main:
+    ; set up registers
     mov ax, cs
     mov ds, ax
-    ; retry counter
-    mov cx, 3
 
     print nl
+
+    ; retry counter for password
+    mov cx, 3
+    ; if has_laready_entered_pwd_and_correct
     cmp byte [pwd_state], 1
+    ; go to shell
     je shell_begin
+    ; otherwise, ask for it
 
 .ask:
     push cx
@@ -118,8 +122,6 @@ shell_begin:
     check_command command_clear, proj_e_compare_start_string, .clear
     ; echo ...
     check_command command_echo, proj_e_compare_start_string, .echo
-    ; color XY
-    check_command command_color, proj_e_compare_start_string, .color
     ; help
     check_command command_help, proj_e_compare_string, .help
     ; reboot
@@ -177,26 +179,6 @@ shell_begin:
     .end_echo:
         jmp shell_begin
 
-.color:
-    call proj_e_tokenize_string
-    mov si, di
-    call proj_e_length_string
-    cmp ax, 2
-    jne .error_color
-    call proj_e_2hex_to_int
-    jc .error_color
-    ; change color c:
-    print .text
-    jmp .end_color
-
-    .error_color:
-        print msg_error_color
-
-    .end_color:
-        jmp shell_begin
-
-    .text db 'color changed', 13, 10, 0
-
 .clear:
     ; if len(cmd.split(' ')) != 2:
     call proj_e_tokenize_string
@@ -219,7 +201,7 @@ shell_begin:
     jmp .end_clear
 
     .error_clear:
-        print msg_error_color
+        print msg_error_clear
 
     .end_clear:
         jmp shell_begin
@@ -283,9 +265,9 @@ shell_begin:
 
     ; while (1)
     .loop_pwd:
-        ; buffer=input("Password? ")
+        ; buffer=getpass("Password? ")
         print ask_pass
-        input buffer, 72
+        getpass buffer, 72
         ; if buffer != ask_lock:
         mov si, buffer
         mov di, pwd_lock

@@ -441,11 +441,16 @@ interpreter:
 
     .retrieve_2_stack_val:
         push si
-            mov si, memory
-            mov byte [ts], byte [si]
             dec si
-            mov byte [ts1], byte [si]
+            mov si, memory
+            mov byte al, [si]
+            mov byte [ts], byte al
+
+            dec si
+            mov byte al, [si]
+            mov byte [ts1], byte al
             add si, 0x02
+
             inc byte [mem_idx]
         pop si
 

@@ -41,6 +41,8 @@ Feel free to open an issue if you encounter any kind of problem with Project E :
 
 ## Updates
 
+**v0.2.4** Enhancing plum : read line, operators, going backward/forward, adding an if
+
 **v0.2.1** Password update: adding a `lock` command to lock the kernel
 
 **v0.2.0** Commands update: adding `echo`, `color`, `clear`, `version`

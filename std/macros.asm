@@ -6,8 +6,10 @@
 ; --------------------------
 
 %macro print 1
-    mov si, %1
-    call proj_e_print
+    push si
+        mov si, %1
+        call proj_e_print
+    pop si
 %endmacro
 
 %macro printhex 1

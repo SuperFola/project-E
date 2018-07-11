@@ -28,7 +28,7 @@ data:
     help_str db 'Language description', 13, 10
              db '====================', 13, 10
              db '! (print mem[p] until \0)', 13, 10
-             db '? (read line, max:256)', 13, 10
+             db '? (read line, max:256 - p)', 13, 10
              db 'b[x] (p -= x) ; B (p--)', 13, 10
              db 'f[x] (p += x) ; F (p++)', 13, 10
              db 's[x] (mem[p] = x) ; S[...] (while code[i]!=$: mem[p++]=x)', 13, 10
@@ -41,6 +41,7 @@ data:
     ; messages
     msg_parsing_err db 'Could not interpret token at 0x', 0
     msg_memptr_mov_error db 'Could not move memory pointer: invalid destination', 13, 10, 0
+    msg_input db '>>> ', 0
 
 main:
     ; set segments
@@ -178,7 +179,37 @@ interpreter:
         jmp .next
 
     .readline:
-        jmp .next
+        print msg_input
+
+        push si
+        mov byte cl, byte [mem_idx]
+        ; store our memory in SI
+        mov si, memory
+
+        .getch:
+            ; no point entering a character if memory is full
+            cmp byte cl, 0xff
+            je .end_reading
+
+            xor ah, ah
+            int 0x16  ; character read will be in AL
+
+            cmp byte al, 0x0d  ; enter pressed
+            je .end_reading
+
+            ; display character
+            mov ah, 0x0e   ; Teletype mode
+            int 0x10       ; Print interrupt
+            ; save character (which is in AX) in memory
+            mystosb si
+            inc byte cl
+            jmp .getch
+
+        .end_reading:
+            mov byte [mem_idx], byte cl
+            pop si
+            print nl
+            jmp .next
 
     .backward:
         cmp byte [mem_idx], 0x00

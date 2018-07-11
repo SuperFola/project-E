@@ -20,6 +20,9 @@ data:
     buffer_index     db 0
     ; to store 2 digits hex numbers
     hexnum times 3   db 0
+    ; to store temp numbers to operate on them
+    ts  db 0
+    ts1 db 0
     ; shell related
     cursor db 'plum> ', 0
     cmd_help db 'help', 0
@@ -36,7 +39,8 @@ data:
              db 'P (prints the value of the memory pointer)', 13, 10
              db 13, 10
              db 'operators: + - / * %', 13, 10
-             db 'x: 2 hex digits [0-9a-fA-F]', 13, 10
+             db '    push TS op TS1', 13, 10
+             db 'x: 2 hex digits [0-9a-fA-F] (unsigned)', 13, 10
              db 0
     ; messages
     msg_parsing_err db 'Could not interpret token at 0x', 0
@@ -164,18 +168,88 @@ interpreter:
             jmp .next
 
     .modulo:
+        push si
+            call .retrieve_2_stack_val
+            mov si, memory
+
+            xor dx, dx
+            xor ah, ah
+            mov byte al, byte [ts]
+            xor bh, bh
+            mov byte bl, byte [ts1]
+            div bx    ; divides AX by BX
+            mov byte dl, byte al  ; store modulo result in AL
+
+            ; storing AL in SI
+            mov [si], al
+        pop si
         jmp .next
 
     .multiply:
+        push si
+            call .retrieve_2_stack_val
+            mov si, memory
+
+            xor ah, ah
+            mov byte al, byte [ts]
+            mov byte bl, byte [ts1]
+            mul bl
+            ; result is in AX
+
+            ; storing AL in SI
+            mov [si], al
+        pop si
         jmp .next
 
     .addition:
+        push si
+            call .retrieve_2_stack_val
+            mov si, memory
+
+            xor ah, ah
+            mov byte al, byte [ts]
+            xor bh, bh
+            mov byte bl, byte [ts1]
+            add ax, bx
+            ; result is in AX
+
+            ; storing AL in SI
+            mov [si], al
+        pop si
         jmp .next
 
     .substract:
+        push si
+            call .retrieve_2_stack_val
+            mov si, memory
+
+            xor ah, ah
+            mov byte al, byte [ts]
+            xor bh, bh
+            mov byte bl, byte [ts1]
+            sub ax, bx
+            ; result is in AX
+
+            ; storing AL in SI
+            mov [si], al
+        pop si
         jmp .next
 
     .divide:
+        push si
+            call .retrieve_2_stack_val
+            mov si, memory
+
+            xor ah, ah
+            mov byte al, byte [ts]
+            xor bh, bh
+            mov byte bl, byte [ts1]
+            div bx    ; divides AX by BX
+            ; result is in AX
+
+            ; storing AL in SI
+            mov [si], al
+        pop si
         jmp .next
 
     .readline:
@@ -362,6 +436,18 @@ interpreter:
                 call proj_e_2hex_to_int
             pop si
         pop di
+
+        ret
+
+    .retrieve_2_stack_val:
+        push si
+            mov si, memory
+            mov byte [ts], byte [si]
+            dec si
+            mov byte [ts1], byte [si]
+            add si, 0x02
+            inc byte [mem_idx]
+        pop si
 
         ret
 

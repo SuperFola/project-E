@@ -168,8 +168,8 @@ interpreter:
             jmp .next
 
     .modulo:
+        call .retrieve_2_stack_val
         push si
-            call .retrieve_2_stack_val
             mov si, memory
 
             xor dx, dx
@@ -181,13 +181,16 @@ interpreter:
             mov byte dl, byte al  ; store modulo result in AL
 
             ; storing AL in SI
+            xor ch, ch
+            mov cl, byte [mem_idx]
+            add si, cx
             mov [si], al
         pop si
         jmp .next
 
     .multiply:
+        call .retrieve_2_stack_val
         push si
-            call .retrieve_2_stack_val
             mov si, memory
 
             xor ah, ah
@@ -197,13 +200,16 @@ interpreter:
             ; result is in AX
 
             ; storing AL in SI
+            xor ch, ch
+            mov cl, byte [mem_idx]
+            add si, cx
             mov [si], al
         pop si
         jmp .next
 
     .addition:
+        call .retrieve_2_stack_val
         push si
-            call .retrieve_2_stack_val
             mov si, memory
 
             xor ah, ah
@@ -214,13 +220,16 @@ interpreter:
             ; result is in AX
 
             ; storing AL in SI
+            xor ch, ch
+            mov cl, byte [mem_idx]
+            add si, cx
             mov [si], al
         pop si
         jmp .next
 
     .substract:
+        call .retrieve_2_stack_val
         push si
-            call .retrieve_2_stack_val
             mov si, memory
 
             xor ah, ah
@@ -231,13 +240,16 @@ interpreter:
             ; result is in AX
 
             ; storing AL in SI
+            xor ch, ch
+            mov cl, byte [mem_idx]
+            add si, cx
             mov [si], al
         pop si
         jmp .next
 
     .divide:
+        call .retrieve_2_stack_val
         push si
-            call .retrieve_2_stack_val
             mov si, memory
 
             xor ah, ah
@@ -248,6 +260,9 @@ interpreter:
             ; result is in AX
 
             ; storing AL in SI
+            xor ch, ch
+            mov cl, byte [mem_idx]
+            add si, cx
             mov [si], al
         pop si
         jmp .next
@@ -440,19 +455,24 @@ interpreter:
         ret
 
     .retrieve_2_stack_val:
-        push si
-            dec si
-            mov si, memory
-            mov byte al, [si]
+        push di
+            mov di, memory
+
+            xor ch, ch
+            mov cl, byte [mem_idx]
+            add di, cx
+
+            dec di
+            mov byte al, [di]
             mov byte [ts], byte al
 
-            dec si
-            mov byte al, [si]
+            dec di
+            mov byte al, [di]
             mov byte [ts1], byte al
-            add si, 0x02
 
-            inc byte [mem_idx]
-        pop si
+            ;inc di
+            ;inc byte [mem_idx]
+        pop di
 
         ret
 

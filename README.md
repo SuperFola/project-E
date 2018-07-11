@@ -2,7 +2,7 @@
 
 Project E is a small Operating System (if we can say so) composed of a basic bootloader and of a simple kernel, capable of execute shell commands.
 
-It was developped and tested under Lubuntu 18.04, on a x86_64 machine.
+It was developped and tested under Linux Mint 19, on a x86_64 machine.
 
 ## Building
 
@@ -40,6 +40,8 @@ We have a nice application template under src/app.asm.
 Feel free to open an issue if you encounter any kind of problem with Project E :smiley:
 
 ## Updates
+
+**v0.3.0** Plum was debugged : now all the operator behave as wanted !
 
 **v0.2.4** Enhancing plum : read line, operators, going backward/forward, adding an if
 

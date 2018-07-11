@@ -18,7 +18,7 @@ start:
 %include "std/readdisk.asm"
 
 data:
-    version  db 'v0.2.2', 0
+    version  db 'v0.2.3', 0
     msg_info db 'Project-E is a monolithic kernel working in 16-bits real mode', 13, 10
              db 'developped by SuperFola', 13, 10
              db 0

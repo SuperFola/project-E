@@ -32,7 +32,7 @@ data:
              db 'b[x] (p -= x) ; B (p--)', 13, 10
              db 'f[x] (p += x) ; F (p++)', 13, 10
              db 's[x] (mem[p] = x) ; S[...] (while code[i]!=$: mem[p++]=x)', 13, 10
-             db 'i[x] (if mem[p] != 0, code index=x)', 13, 10
+             db 'i[x] (if mem[p] != 0, code index=x (absolute))', 13, 10
              db 'P (prints the value of the memory pointer)', 13, 10
              db 13, 10
              db 'operators: + - / * %', 13, 10
@@ -188,7 +188,7 @@ interpreter:
 
         .backward_error:
             print msg_memptr_mov_error
-            jmp interpreter
+            jmp shell_begin
 
     .forward:
         cmp byte [mem_idx], 0xff
@@ -198,7 +198,7 @@ interpreter:
 
         .forward_error:
             print msg_memptr_mov_error
-            jmp interpreter
+            jmp shell_begin
 
     .print_ptr:
         xor ah, ah
@@ -248,8 +248,31 @@ interpreter:
         jmp .next
 
     .if:
-        ;cmp byte [memory+memory_index]
+        push si
+        mov si, memory
+            ; move in the memory to compare the current memory thing
+            xor ch, ch
+            mov cl, byte [mem_idx]
+            add si, cx
+        cmp byte [si], 0x00
+        je .equal
+        pop si
         jmp .next
+
+        .equal:
+            pop si
+            call .readhexval
+            ; reset buffer current character pointed
+            mov si, buffer
+            mov byte [buffer_index], 0x00
+            ; set up counter
+            mov cx, ax
+            .loop:
+                call .move_in_buffer
+                dec cx
+                cmp cx, 0x00
+                jne .loop
+            jmp interpreter
 
     .store_one:
         call .readhexval
